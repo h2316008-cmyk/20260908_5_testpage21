@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天球観測シミュレーター</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#00081a">
+    <!-- 追加: iOS向けのアイコン設定 -->
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- ... -->
+
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        #moon-draw-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+        #moon-draw-content {
+            background: #111;
+            padding: clamp(10px, 3vw, 20px);
+            border-radius: 10px;
+            border: 1px solid #444;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #fff;
+            max-width: 95vw;
+            max-height: 95vh;
+            overflow: auto;
+        }
+        #moon-draw-content h3 {
+            font-size: clamp(16px, 4vw, 24px);
+            margin-top: 0;
+            margin-bottom: clamp(10px, 2vh, 20px);
+        }
+        #moon-canvas-container {
+            position: relative;
+            /* デバイスサイズ（画面の短い方）に合わせて相対的に変化させる。
+               clamp()で最小200px、基本70vmin、最大500pxの範囲に収める */
+            width: clamp(200px, 70vmin, 500px);
+            height: clamp(200px, 70vmin, 500px); /* 正方形を維持 */
+            background-color: #000;
+            border: 2px solid #555;
+            margin: clamp(10px, 2vh, 15px) 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: none;
+            box-sizing: border-box; /* ボーダーを含めてサイズ計算する */
+        }
+        #moon-canvas-guide {
+            position: absolute;
+            /* 親コンテナに対して相対的なサイズ（80%）にする */
+            width: 80%;
+            height: 80%;
+            border: 2px dashed rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            pointer-events: none;
+            box-sizing: border-box;
+        }
+        #moon-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            /* 親コンテナいっぱいに広げる */
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+            touch-action: none;
+        }
+        .moon-btn-group {
+            display: flex;
+            gap: clamp(10px, 2vw, 15px);
+            margin-top: clamp(10px, 2vh, 15px);
+        }
+        .moon-btn-group button {
+            padding: clamp(8px, 1.5vw, 10px) clamp(12px, 3vw, 20px);
+            font-size: clamp(14px, 3vw, 16px);
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+        }
+        #btn-moon-confirm {
+            background-color: #ffeb3b;
+            color: #000;
+            font-weight: bold;
+        }
+        #btn-moon-clear {
+            background-color: #555;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="bt-connection-frame"></div>
+
+    <canvas id="main"></canvas>
+
+    <div id="record-type-modal" style="display:none;">
+        <div id="mode-select-content">
+            <h2>見たものをえらびましょう。</h2>
+            <div class="mode-buttons">
+                <button id="btn-record-sun">太陽</button>
+                <button id="btn-record-moon">月</button>
+                <button id="btn-record-other">その他の天体</button>
+                <button id="btn-record-back">戻る</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="moon-draw-modal" style="display:none;">
+        <div id="moon-draw-content">
+            <h3>月の形をかきましょう。</h3>
+            <div id="moon-canvas-container">
+                <div id="moon-canvas-guide"></div>
+                <canvas id="moon-canvas" width="512" height="512"></canvas>
+            </div>
+            <div class="moon-btn-group">
+                <button id="btn-moon-clear">かき直す</button>
+                <button id="btn-moon-confirm">月の形を決定する</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="ui-container">
+        <button id="connectBtn">micro:bitにつなぐ</button>
+        <button id="modeBtn" style="display:none;">モード: センサー</button>
+        <button id="calibBtn" style="display:none;">キャリブレーションをはじめる</button>
+    </div>
+
+    <div id="top-right-info">
+        <button id="menuBtn" class="hamburger-btn" aria-label="メニュー">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </button>
+
+        <div id="date"></div>
+        <div id="clock"></div>
+
+        <div class="action-buttons" id="actionMenu">
+            <button id="recordBtn">記ろくする</button>
+            
+            <button id="resetBtn">全データ消去</button>
+            <button id="shareBtn">みんなの記ろくも見る</button>
+            
+            <div class="menu-checkboxes">
+                <label>
+                    <input type="checkbox" id="toggle-radar" checked> レーダーを表示
+                </label>
+                <label>
+                    <input type="checkbox" id="toggle-direction" checked> 方位を表示
+                </label>
+                <label>
+                    <input type="checkbox" id="toggle-timeslider" checked> タイムスライダーを表示
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div id="crosshair-labels">
+        <div id="label-azimuth">北 0.0°</div>
+        <div id="label-elevation">0.0°</div>
+        <div id="status-message" style="display:none;"></div>
+    </div>
+
+    <div id="shared-time-slider-container">
+        <div id="shared-time-display">--/--/-- --:--</div>
+        <input type="range" id="shared-time-slider" min="0" max="100" value="50">
+    </div>
+
+    <div id="tooltip"></div>
+
+    <div id="prompt-modal">
+        <div id="prompt-content">
+            <h3 id="prompt-msg">メッセージ</h3>
+            <input type="text" id="prompt-input" autocomplete="off">
+            <div style="margin-top: clamp(15px, 3vh, 20px);">
+                <button id="prompt-ok">決定</button>
+                <button id="prompt-cancel">キャンセル</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/three@0.142.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/examples/js/controls/OrbitControls.js"></script>
+    <script type="module" src="js/main.js"></script>
+</body>
+
+</html>
