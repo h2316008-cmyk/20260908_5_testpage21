@@ -52,6 +52,7 @@ import { MicrobitInput } from './MicrobitInput.js';
 
 import { SharingManager } from './SharingManager.js';
 import { TimeSliderUI } from './TimeSliderUI.js';
+import { DBStorage } from './db.js';
 
 const LATITUDE = 37.7608;
 const LONGITUDE = 140.4748;
@@ -473,6 +474,92 @@ export class SkyController {
         if (recordBtn) {
             recordBtn.addEventListener('click', () => {
                 this.executeRecord();
+            });
+        }
+
+        // --- 保存（セーブ）ボタンの処理 ---
+        const saveBtn = document.getElementById('saveBtn');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', async () => {
+                const title = prompt("セーブデータのタイトルを入力してください:", `観測データ_${new Date().toLocaleDateString()}`);
+                if (!title) return;
+
+                const saveData = {
+                    id: `save_${Date.now()}`,
+                    title: title,
+                    timestamp: Date.now(),
+                    classCode: localStorage.getItem('sky_class_code') || '',
+                    observationMode: this.model.observationMode,
+                    records: this.model.records
+                };
+
+                // IndexedDB の 'saves' ストアに保存
+                await DBStorage.set('saves', null, saveData);
+                
+                if (this.view?.showStatusMessage) {
+                    this.view.showStatusMessage("IndexedDBに保存しました", 3000);
+                }
+            });
+        }
+
+        // --- 読み込み（ロード）ボタンの処理 ---
+        const loadBtn = document.getElementById('loadBtn');
+        const loadModal = document.getElementById('load-modal');
+        const saveListContainer = document.getElementById('save-list');
+
+        if (loadBtn) {
+            loadBtn.addEventListener('click', async () => {
+                const saves = await DBStorage.getAllSaves();
+                saveListContainer.innerHTML = '';
+
+                if (saves.length === 0) {
+                    saveListContainer.innerHTML = '<p>保存されたデータはありません</p>';
+                } else {
+                    saves.forEach(save => {
+                        const item = document.createElement('div');
+                        item.className = 'save-item';
+                        item.style.cssText = 'display:flex; justify-content:space-between; margin:10px 0; align-items:center;';
+                        item.innerHTML = `
+                            <span><strong>${save.title}</strong> (${new Date(save.timestamp).toLocaleString()})</span>
+                            <div>
+                                <button class="btn-load-slot" data-id="${save.id}">ロード</button>
+                                <button class="btn-del-slot" data-id="${save.id}">削除</button>
+                            </div>
+                        `;
+                        saveListContainer.appendChild(item);
+                    });
+                }
+
+                loadModal.style.display = 'flex';
+            });
+
+            // モーダル内のボタンイベント対応
+            saveListContainer.addEventListener('click', async (e) => {
+                const id = e.target.getAttribute('data-id');
+                if (!id) return;
+
+                if (e.target.classList.contains('btn-load-slot')) {
+                    const saves = await DBStorage.getAllSaves();
+                    const targetSave = saves.find(s => s.id === id);
+                    if (targetSave) {
+                        this.model.observationMode = targetSave.observationMode;
+                        this.model.records = targetSave.records;
+                        await this.model.saveAutoSave();
+                        
+                        this.sharingManager.publish();
+                        this.updateViewRecords();
+                        loadModal.style.display = 'none';
+                    }
+                } else if (e.target.classList.contains('btn-del-slot')) {
+                    if (confirm("このセーブデータを削除しますか？")) {
+                        await DBStorage.deleteSave(id);
+                        e.target.closest('.save-item').remove();
+                    }
+                }
+            });
+
+            document.getElementById('close-load-modal')?.addEventListener('click', () => {
+                loadModal.style.display = 'none';
             });
         }
 
