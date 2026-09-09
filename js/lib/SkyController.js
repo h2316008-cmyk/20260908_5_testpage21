@@ -52,7 +52,7 @@ import { MicrobitInput } from './MicrobitInput.js';
 
 // 共有機構無効化
 // import { SharingManager } from './SharingManager.js';
-import { TimeSliderUI } from './TimeSliderUI.js';
+// import { TimeSliderUI } from './TimeSliderUI.js';
 import { DBStorage } from './db.js';
 
 const LATITUDE = 37.7608;
@@ -114,12 +114,14 @@ export class SkyController {
 
         // 共有機構無効化
         // this.sharingManager = new SharingManager(this.model, () => this.updateViewRecords());
+        
+        /* 共有機構無効化に伴いコメントアウト
         this.timeSliderUI = new TimeSliderUI((ts) => {
             this.model.filterTimestamp = ts;
             this.updateViewRecords();
         });
-
         this.timeSliderUI.show(this.model.records);
+        */
 
         this.mouseInput = new MouseInput(this.view, null, (data, x, y) => {
             const tooltip = document.getElementById('tooltip');
@@ -226,7 +228,7 @@ export class SkyController {
         // this.sharingManager.publish();
 
         const allRecords = this.model.records;
-        this.timeSliderUI.show(allRecords);
+        // this.timeSliderUI.show(allRecords);
 
         this.updateViewRecords();
 
@@ -248,7 +250,8 @@ export class SkyController {
 
     updateViewRecords() {
         const allRecords = this.model.records;
-        this.view.drawRecords(allRecords, this.model.isSharedMode, this.model.filterTimestamp);
+        // 共有機構無効化のためシグネチャを変更
+        this.view.drawRecords(allRecords);
     }
 
     loadSunCalc() {
@@ -578,7 +581,7 @@ export class SkyController {
                         // this.sharingManager.publish();
 
                         const allRecords = this.model.records;
-                        this.timeSliderUI.show(allRecords);
+                        // this.timeSliderUI.show(allRecords);
                         
                         this.updateViewRecords();
 
@@ -640,7 +643,7 @@ export class SkyController {
 
                     localStorage.removeItem('sky_camera_view');
 
-                    this.timeSliderUI.show([]);
+                    // this.timeSliderUI.show([]);
                     this.updateRecordBtnVisibility();
                 }
             });
@@ -666,6 +669,7 @@ export class SkyController {
             this.view.setDirectionVisible(toggleDirection.checked);
         }
 
+        /* 共有機構無効化に伴いコメントアウト
         // タイムスライダーの表示切替
         const toggleTimeslider = document.getElementById('toggle-timeslider');
         const sliderContainer = document.getElementById('shared-time-slider-container');
@@ -675,6 +679,7 @@ export class SkyController {
             });
             sliderContainer.style.display = toggleTimeslider.checked ? 'block' : 'none';
         }
+        */
 
     }
 

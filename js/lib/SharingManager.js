@@ -1,3 +1,5 @@
+// 共有機構無効化のため全体をコメントアウト
+/*
 import { DBStorage } from './db.js';
 
 export class SharingManager {
@@ -90,3 +92,4 @@ export class SharingManager {
         this.onUpdate();
     }
 }
+*/
