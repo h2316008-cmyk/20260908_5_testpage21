@@ -94,8 +94,8 @@ export class SkyView {
         // 背景画像用のテクスチャローダーを準備
         const textureLoader = new THREE.TextureLoader();
 
-        // background.jpgを読み込み
-        textureLoader.load('background.jpg', (texture) => {
+        // background.pngを読み込み
+        textureLoader.load('background.png', (texture) => {
             // ★ 背景画像のテクスチャを左右反転させる
             texture.wrapS = THREE.RepeatWrapping;
             texture.repeat.x = -1;
@@ -113,7 +113,7 @@ export class SkyView {
             const bgMaterial = new THREE.MeshBasicMaterial({
                 map: texture,
                 side: THREE.BackSide, // 天球の内側から見るため BackSide を指定
-                // transparent と opacity を削除（または false に設定）して完全に不透明にし、元の茶色背景を遮断
+                transparent: true,    // 透過部分の背景色（昼: 水色 / 夜: 紺色）を表示するためtrueに設定
                 depthWrite: false     // 天球内のワイヤーフレームや星描画の深度干渉を防ぐ
             });
 
