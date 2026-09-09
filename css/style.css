@@ -30,7 +30,7 @@ body {
     pointer-events: none;
 }
 
-#ui-container > button {
+#ui-container>button {
     pointer-events: auto;
 }
 
@@ -203,8 +203,8 @@ button:hover {
     color: #222;
     padding: clamp(8px, 1.5vh, 12px);
     border-radius: 8px;
-    pointer-events: auto; 
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    pointer-events: auto;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
     font-size: clamp(12px, 2vw, 14px);
     line-height: 1.5;
     z-index: 1000;
@@ -248,7 +248,10 @@ button:hover {
 #modal-overlay,
 .modal-overlay {
     position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
     background: rgba(0, 0, 0, 0.7);
     display: none;
     justify-content: center;
@@ -276,7 +279,7 @@ button:hover {
 }
 
 #record-list li {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
     margin: 5px 0;
     padding: clamp(6px, 1.5vh, 10px);
     border-radius: 5px;
@@ -288,7 +291,7 @@ button:hover {
 }
 
 #record-list li:hover {
-    background: rgba(255,255,255,0.3);
+    background: rgba(255, 255, 255, 0.3);
 }
 
 #closeModalBtn {
@@ -298,12 +301,15 @@ button:hover {
 /* 入力を止めないオリジナルポップアップのスタイル */
 #prompt-modal {
     position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
     background: rgba(0, 0, 0, 0.7);
-    display: none; 
+    display: none;
     justify-content: center;
     align-items: center;
-    z-index: 6000; 
+    z-index: 6000;
 }
 
 #prompt-content {
@@ -336,12 +342,15 @@ button:hover {
 /* 記録時の天体選択画面 */
 #record-type-modal {
     position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
     background: rgba(0, 0, 0, 0.85);
     display: none;
     justify-content: center;
     align-items: center;
-    z-index: 9999; 
+    z-index: 9999;
 }
 
 #mode-select-content {
@@ -365,7 +374,8 @@ button:hover {
     display: flex;
     justify-content: center;
     gap: clamp(10px, 2vw, 15px);
-    flex-wrap: wrap; /* 画面が狭いときに折り返すように */
+    flex-wrap: wrap;
+    /* 画面が狭いときに折り返すように */
 }
 
 .mode-buttons button {
@@ -416,7 +426,7 @@ button:hover {
     z-index: 3000;
     text-align: center;
     pointer-events: auto;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
 }
 
 #shared-time-header {
@@ -428,11 +438,14 @@ button:hover {
 }
 
 #shared-time-display {
-    /* フォントサイズを可変に */
-    font-size: clamp(14px, 2.5vw, 18px);
-    color: #00aaff;
+    /* フォントサイズを拡大（最小16px〜最大22px） */
+    font-size: clamp(16px, 3.5vw, 22px);
+    color: #40c4ff;
+    /* 視認性の高い明るいシアンカラー */
     font-weight: bold;
     font-family: monospace;
+    /* 黒い影をしっかりつけて文字をくっきり見せる */
+    text-shadow: 0 0 6px rgba(0, 0, 0, 0.9), 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 #reset-time-btn {
@@ -461,6 +474,32 @@ button:hover {
     background: transparent;
 }
 
+/* 箱の外に出した「時刻表示・ボタン」のレイアウト設定 */
+#shared-time-header {
+    position: fixed;
+    bottom: clamp(95px, 13vh, 120px);
+    left: 50%;
+    transform: translateX(-50%);
+
+    /* 内容を中央寄せ */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+
+    /* 明るい背景でも視認性を保つ背景バッジ */
+    background: rgba(0, 15, 35, 0.75);
+    backdrop-filter: blur(4px);
+    /* 背景をほんのりぼかす */
+    padding: clamp(6px, 1vh, 8px) clamp(16px, 3vw, 24px);
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+
+    z-index: 9999;
+    pointer-events: auto;
+}
+
 /* バー（軌道）のスタイル：着色せずグレーにする */
 #shared-time-slider::-webkit-slider-runnable-track {
     width: 100%;
@@ -468,6 +507,7 @@ button:hover {
     background: #e0e0e0;
     border-radius: 3px;
 }
+
 #shared-time-slider::-moz-range-track {
     width: 100%;
     height: 6px;
@@ -487,6 +527,7 @@ button:hover {
     margin-top: -6px;
     border: none;
 }
+
 #shared-time-slider::-moz-range-thumb {
     width: 18px;
     height: 18px;
@@ -559,7 +600,8 @@ button:hover {
     font-size: clamp(12px, 2.5vw, 15px);
     cursor: pointer;
     color: #ffffff;
-    user-select: none; /* テキストの誤選択を防ぐ */
+    user-select: none;
+    /* テキストの誤選択を防ぐ */
 }
 
 .menu-checkboxes input[type="checkbox"] {
@@ -590,4 +632,102 @@ button:hover {
     transform: translateX(-50%);
     box-shadow: 0 0 4px rgba(255, 204, 0, 0.8);
     z-index: 10;
+}
+
+#moon-draw-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+#moon-draw-content {
+    background: #111;
+    padding: clamp(10px, 3vw, 20px);
+    border-radius: 10px;
+    border: 1px solid #444;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #fff;
+    max-width: 95vw;
+    max-height: 95vh;
+    overflow: auto;
+}
+
+#moon-draw-content h3 {
+    font-size: clamp(16px, 4vw, 24px);
+    margin-top: 0;
+    margin-bottom: clamp(10px, 2vh, 20px);
+}
+
+#moon-canvas-container {
+    position: relative;
+    /* デバイスサイズ（画面の短い方）に合わせて相対的に変化させる。
+        clamp()で最小200px、基本70vmin、最大500pxの範囲に収める */
+    width: clamp(200px, 70vmin, 500px);
+    height: clamp(200px, 70vmin, 500px);
+    /* 正方形を維持 */
+    background-color: #000;
+    border: 2px solid #555;
+    margin: clamp(10px, 2vh, 15px) 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    touch-action: none;
+    box-sizing: border-box;
+    /* ボーダーを含めてサイズ計算する */
+}
+
+#moon-canvas-guide {
+    position: absolute;
+    /* 親コンテナに対して相対的なサイズ（80%）にする */
+    width: 80%;
+    height: 80%;
+    border: 2px dashed rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    pointer-events: none;
+    box-sizing: border-box;
+}
+
+#moon-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    /* 親コンテナいっぱいに広げる */
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+    touch-action: none;
+}
+
+.moon-btn-group {
+    display: flex;
+    gap: clamp(10px, 2vw, 15px);
+    margin-top: clamp(10px, 2vh, 15px);
+}
+
+.moon-btn-group button {
+    padding: clamp(8px, 1.5vw, 10px) clamp(12px, 3vw, 20px);
+    font-size: clamp(14px, 3vw, 16px);
+    cursor: pointer;
+    border-radius: 5px;
+    border: none;
+}
+
+#btn-moon-confirm {
+    background-color: #ffeb3b;
+    color: #000;
+    font-weight: bold;
+}
+
+#btn-moon-clear {
+    background-color: #555;
+    color: #fff;
 }

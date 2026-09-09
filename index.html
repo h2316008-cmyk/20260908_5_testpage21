@@ -12,94 +12,6 @@
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="theme-color" content="#ffffff">
     <link rel="stylesheet" href="css/style.css">
-    <style>
-        #moon-draw-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: rgba(0, 0, 0, 0.85);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-        }
-        #moon-draw-content {
-            background: #111;
-            padding: clamp(10px, 3vw, 20px);
-            border-radius: 10px;
-            border: 1px solid #444;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #fff;
-            max-width: 95vw;
-            max-height: 95vh;
-            overflow: auto;
-        }
-        #moon-draw-content h3 {
-            font-size: clamp(16px, 4vw, 24px);
-            margin-top: 0;
-            margin-bottom: clamp(10px, 2vh, 20px);
-        }
-        #moon-canvas-container {
-            position: relative;
-            /* デバイスサイズ（画面の短い方）に合わせて相対的に変化させる。
-               clamp()で最小200px、基本70vmin、最大500pxの範囲に収める */
-            width: clamp(200px, 70vmin, 500px);
-            height: clamp(200px, 70vmin, 500px); /* 正方形を維持 */
-            background-color: #000;
-            border: 2px solid #555;
-            margin: clamp(10px, 2vh, 15px) 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            touch-action: none;
-            box-sizing: border-box; /* ボーダーを含めてサイズ計算する */
-        }
-        #moon-canvas-guide {
-            position: absolute;
-            /* 親コンテナに対して相対的なサイズ（80%）にする */
-            width: 80%;
-            height: 80%;
-            border: 2px dashed rgba(255, 255, 255, 0.4);
-            border-radius: 50%;
-            pointer-events: none;
-            box-sizing: border-box;
-        }
-        #moon-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            /* 親コンテナいっぱいに広げる */
-            width: 100%;
-            height: 100%;
-            cursor: crosshair;
-            touch-action: none;
-        }
-        .moon-btn-group {
-            display: flex;
-            gap: clamp(10px, 2vw, 15px);
-            margin-top: clamp(10px, 2vh, 15px);
-        }
-        .moon-btn-group button {
-            padding: clamp(8px, 1.5vw, 10px) clamp(12px, 3vw, 20px);
-            font-size: clamp(14px, 3vw, 16px);
-            cursor: pointer;
-            border-radius: 5px;
-            border: none;
-        }
-        #btn-moon-confirm {
-            background-color: #ffeb3b;
-            color: #000;
-            font-weight: bold;
-        }
-        #btn-moon-clear {
-            background-color: #555;
-            color: #fff;
-        }
-    </style>
 </head>
 
 <body>
@@ -128,7 +40,8 @@
             </div>
             <div style="margin-top: 10px; display: flex; align-items: center; gap: 10px;">
                 <label for="moon-color-picker" style="font-size: clamp(14px, 3vw, 16px);">色をえらぶ:</label>
-                <input type="color" id="moon-color-picker" value="#ffff77" style="width: 50px; height: 40px; cursor: pointer;">
+                <input type="color" id="moon-color-picker" value="#ffff77"
+                    style="width: 50px; height: 40px; cursor: pointer;">
             </div>
             <div class="moon-btn-group">
                 <button id="btn-moon-clear">かき直す</button>
@@ -155,7 +68,7 @@
             <button id="saveBtn">データを保存</button>
             <button id="loadBtn">データを読み込み</button>
             <button id="resetBtn">全データ消去</button>
-            
+
             <div class="menu-checkboxes">
                 <label>
                     <input type="checkbox" id="toggle-radar" checked> レーダーを表示
@@ -176,11 +89,11 @@
         <div id="status-message" style="display:none;"></div>
     </div>
 
+    <div id="shared-time-header">
+        <div id="shared-time-display">--/--/-- --:--</div>
+        <button id="reset-time-btn">今の時こくにもどる</button>
+    </div>
     <div id="shared-time-slider-container">
-        <div id="shared-time-header">
-            <div id="shared-time-display">--/--/-- --:--</div>
-            <button id="reset-time-btn">今の時こくにもどる</button>
-        </div>
         <div id="shared-time-marks"></div>
         <input type="range" id="shared-time-slider" min="0" max="100" value="50">
         <div id="shared-time-ticks"></div>
