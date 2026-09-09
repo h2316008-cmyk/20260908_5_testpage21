@@ -318,7 +318,7 @@ export class SkyView {
             if(child.material) child.material.dispose();
         }
 
-        // 天体画像の基本サイズを小さく変更
+        // 天体画像の基本サイズを設定
         const moonSize = 20; 
 
         records.forEach(rec => {
@@ -406,14 +406,15 @@ export class SkyView {
             };
             this.recordGroup.add(recordMark);
 
-            // 時刻ラベルのベースフォントサイズを大きく変更
-            const timeLabel = this.createTextSprite(rec.timeStr, '#ffffff', 140);
+            // 日時ラベルの作成（日付と時刻を表示）
+            const labelText = rec.dateStr ? `${rec.dateStr} ${rec.timeStr}` : rec.timeStr;
+            const timeLabel = this.createTextSprite(labelText, '#ffffff', 100);
             
             // ★ 修正: 時刻のラベルも最前面に出すために追加
             timeLabel.material.depthTest = false;
             timeLabel.renderOrder = 999;
             
-            // 時刻ラベルの表示スケールを大きく変更
+            // 日時ラベルの表示スケールを設定
             timeLabel.scale.set(160, 40, 1); 
 
             // 画像のサイズ変更に合わせてオフセットを調整
@@ -446,7 +447,7 @@ export class SkyView {
         canvasLabel.width = 1024; canvasLabel.height = 256;
         ctx.fillStyle = color; ctx.font = `Bold ${fontSize}px sans-serif`;
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText(text, 512, 128);
+        ctx.fillText(text, 512, 128, 980); // maxWidth を 980px に指定して文字のはみ出しを防止
         return new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvasLabel), transparent: true }));
     }
 
