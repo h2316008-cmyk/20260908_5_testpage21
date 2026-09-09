@@ -46,8 +46,13 @@ export class TimeSliderUI {
     updateRange(records) {
         if (records.length === 0) {
             const now = Date.now();
-            this.slider.min = now - 3600000;
-            this.slider.max = now + 3600000;
+            const d = new Date(now);
+            // 記録がない場合は当日の午前0時～午後12時(23:59:59)とする
+            const minTs = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0).getTime();
+            const maxTs = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59).getTime();
+            
+            this.slider.min = minTs;
+            this.slider.max = maxTs;
             this.slider.value = now;
             this.updateDisplay(now);
             this.onChange(now);
@@ -64,8 +69,14 @@ export class TimeSliderUI {
         });
         
         const originalMaxTs = maxTs;
-        minTs -= 3600000; // 最も古い時間の1時間前
-        maxTs += 3600000; // 最も新しい時間の1時間後
+        
+        // 最古の日付の午前0時に設定
+        const minDate = new Date(minTs);
+        minTs = new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate(), 0, 0, 0).getTime();
+
+        // 最新の日付の午後12時（23時59分59秒）に設定
+        const maxDate = new Date(maxTs);
+        maxTs = new Date(maxDate.getFullYear(), maxDate.getMonth(), maxDate.getDate(), 23, 59, 59).getTime();
 
         this.slider.min = minTs;
         this.slider.max = maxTs;
