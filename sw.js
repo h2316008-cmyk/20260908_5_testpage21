@@ -1,4 +1,4 @@
-const CACHE_NAME = 'HoshiPita-cache-v2';
+const CACHE_NAME = 'HoshiPita-cache-v3';
 
 // キャッシュするファイルのリスト
 const urlsToCache = [

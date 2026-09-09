@@ -257,7 +257,8 @@ button:hover {
 }
 
 /* モーダルのスタイル */
-#modal-overlay {
+#modal-overlay,
+.modal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;
     background: rgba(0, 0, 0, 0.7);
@@ -267,7 +268,8 @@ button:hover {
     z-index: 2000;
 }
 
-#modal-content {
+#modal-content,
+.modal-content {
     background: #1a1a2e;
     padding: clamp(15px, 3vh, 25px);
     border-radius: 10px;

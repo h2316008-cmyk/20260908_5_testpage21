@@ -221,9 +221,6 @@ export class SkyController {
         // 記録を追加し、描画対象として保持
         const newRecord = this.model.addRecord(ele, azi, phi, theta, objectName, null, observerName);
         this.currentRecordToDraw = newRecord;
-        
-        // 共有機構無効化
-        // this.sharingManager.publish();
 
         const allRecords = this.model.records;
         this.timeSliderUI.show(allRecords);
@@ -341,7 +338,7 @@ export class SkyController {
     }
 
     isModalOpen() {
-        const modalIds = ['record-type-modal', 'prompt-modal', 'moon-draw-modal', 'modal-overlay'];
+        const modalIds = ['record-type-modal', 'prompt-modal', 'moon-draw-modal', 'modal-overlay', 'load-modal'];
         return modalIds.some(id => {
             const el = document.getElementById(id);
             return el && window.getComputedStyle(el).display !== 'none';
@@ -460,13 +457,107 @@ export class SkyController {
                 }
                 
                 this.model.saveAutoSave();
-                // 共有機構無効化
-                // this.sharingManager.publish();
                 this.updateViewRecords();
                 
                 document.getElementById('moon-draw-modal').style.display = 'none';
             });
         }
+    }
+
+    escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>"']/g, (m) => {
+            return {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[m];
+        });
+    }
+
+    async createNewSave() {
+        const defaultTitle = `観測データ_${new Date().toLocaleDateString('ja-JP')}`;
+        const title = prompt("セーブデータのタイトルを入力してください:", defaultTitle);
+        if (!title || title.trim() === "") return false;
+
+        const saveData = {
+            id: `save_${Date.now()}`,
+            title: title.trim(),
+            timestamp: Date.now(),
+            classCode: localStorage.getItem('sky_class_code') || '',
+            observationMode: this.model.observationMode,
+            records: [...this.model.records]
+        };
+
+        await DBStorage.set('saves', null, saveData);
+        
+        if (this.view?.showStatusMessage) {
+            this.view.showStatusMessage("IndexedDBに保存しました", 2500);
+        }
+        return true;
+    }
+
+    async renderSaveList() {
+        const saveListContainer = document.getElementById('save-list');
+        if (!saveListContainer) return;
+
+        const saves = await DBStorage.getAllSaves();
+        saves.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+        saveListContainer.innerHTML = '';
+
+        if (saves.length === 0) {
+            saveListContainer.innerHTML = '<p style="color:#aaa; padding:15px 0; text-align:center;">保存されたデータはありません</p>';
+            return;
+        }
+
+        saves.forEach(save => {
+            const item = document.createElement('div');
+            item.className = 'save-item';
+            item.style.cssText = 'display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.08); margin:8px 0; padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.1);';
+            
+            const dateStr = save.timestamp ? new Date(save.timestamp).toLocaleString('ja-JP') : '';
+            const recordCount = Array.isArray(save.records) ? save.records.length : 0;
+
+            const titleSpan = document.createElement('div');
+            titleSpan.style.cssText = 'text-align:left; flex-grow:1; margin-right:10px; overflow:hidden;';
+            titleSpan.innerHTML = `
+                <div style="font-weight:bold; font-size:15px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; color:#fff;">${this.escapeHtml(save.title || '無題')}</div>
+                <div style="font-size:12px; color:#aaa; margin-top:2px;">${dateStr} (${recordCount}件の記ろく)</div>
+            `;
+
+            const btnGroup = document.createElement('div');
+            btnGroup.style.cssText = 'display:flex; gap:5px; flex-shrink:0;';
+
+            const loadBtn = document.createElement('button');
+            loadBtn.className = 'btn-load-slot';
+            loadBtn.dataset.id = save.id;
+            loadBtn.style.cssText = 'padding:4px 10px; font-size:13px; background:#007acc; border:none; margin-right:0;';
+            loadBtn.innerText = '復元';
+
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn-edit-slot';
+            editBtn.dataset.id = save.id;
+            editBtn.style.cssText = 'padding:4px 10px; font-size:13px; background:#e6a100; border:none; margin-right:0;';
+            editBtn.innerText = '編集';
+
+            const delBtn = document.createElement('button');
+            delBtn.className = 'btn-del-slot';
+            delBtn.dataset.id = save.id;
+            delBtn.style.cssText = 'padding:4px 10px; font-size:13px; background:#d32f2f; border:none; margin-right:0;';
+            delBtn.innerText = '削除';
+
+            btnGroup.appendChild(loadBtn);
+            btnGroup.appendChild(editBtn);
+            btnGroup.appendChild(delBtn);
+
+            item.appendChild(titleSpan);
+            item.appendChild(btnGroup);
+
+            saveListContainer.appendChild(item);
+        });
     }
 
     initUIHandlers() {
@@ -477,84 +568,88 @@ export class SkyController {
             });
         }
 
-        // --- 保存（セーブ）ボタンの処理 ---
+        // --- 保存（セーブ）ボタンの処理 (Create) ---
         const saveBtn = document.getElementById('saveBtn');
         if (saveBtn) {
             saveBtn.addEventListener('click', async () => {
-                const title = prompt("セーブデータのタイトルを入力してください:", `観測データ_${new Date().toLocaleDateString()}`);
-                if (!title) return;
+                await this.createNewSave();
+            });
+        }
 
-                const saveData = {
-                    id: `save_${Date.now()}`,
-                    title: title,
-                    timestamp: Date.now(),
-                    classCode: localStorage.getItem('sky_class_code') || '',
-                    observationMode: this.model.observationMode,
-                    records: this.model.records
-                };
-
-                // IndexedDB の 'saves' ストアに保存
-                await DBStorage.set('saves', null, saveData);
-                
-                if (this.view?.showStatusMessage) {
-                    this.view.showStatusMessage("IndexedDBに保存しました", 3000);
+        // モーダル内の「現在の状態を保存」ボタン (Create)
+        const modalSaveNewBtn = document.getElementById('modal-save-new-btn');
+        if (modalSaveNewBtn) {
+            modalSaveNewBtn.addEventListener('click', async () => {
+                const saved = await this.createNewSave();
+                if (saved) {
+                    await this.renderSaveList();
                 }
             });
         }
 
-        // --- 読み込み（ロード）ボタンの処理 ---
+        // --- 読み込み（ロード）ボタンの処理 (Read / Update / Delete / Restore) ---
         const loadBtn = document.getElementById('loadBtn');
         const loadModal = document.getElementById('load-modal');
         const saveListContainer = document.getElementById('save-list');
 
-        if (loadBtn) {
+        if (loadBtn && loadModal && saveListContainer) {
             loadBtn.addEventListener('click', async () => {
-                const saves = await DBStorage.getAllSaves();
-                saveListContainer.innerHTML = '';
-
-                if (saves.length === 0) {
-                    saveListContainer.innerHTML = '<p>保存されたデータはありません</p>';
-                } else {
-                    saves.forEach(save => {
-                        const item = document.createElement('div');
-                        item.className = 'save-item';
-                        item.style.cssText = 'display:flex; justify-content:space-between; margin:10px 0; align-items:center;';
-                        item.innerHTML = `
-                            <span><strong>${save.title}</strong> (${new Date(save.timestamp).toLocaleString()})</span>
-                            <div>
-                                <button class="btn-load-slot" data-id="${save.id}">ロード</button>
-                                <button class="btn-del-slot" data-id="${save.id}">削除</button>
-                            </div>
-                        `;
-                        saveListContainer.appendChild(item);
-                    });
-                }
-
+                await this.renderSaveList();
                 loadModal.style.display = 'flex';
             });
 
-            // モーダル内のボタンイベント対応
+            // モーダル内の各アクション（復元 / 編集 / 削除）
             saveListContainer.addEventListener('click', async (e) => {
-                const id = e.target.getAttribute('data-id');
+                const button = e.target.closest('button');
+                if (!button) return;
+
+                const id = button.getAttribute('data-id');
                 if (!id) return;
 
-                if (e.target.classList.contains('btn-load-slot')) {
-                    const saves = await DBStorage.getAllSaves();
-                    const targetSave = saves.find(s => s.id === id);
+                const saves = await DBStorage.getAllSaves();
+                const targetSave = saves.find(s => s.id === id);
+
+                // --- 復元 (Restore) ---
+                if (button.classList.contains('btn-load-slot')) {
                     if (targetSave) {
                         this.model.observationMode = targetSave.observationMode;
-                        this.model.records = targetSave.records;
+                        this.model.records = Array.isArray(targetSave.records) ? [...targetSave.records] : [];
                         await this.model.saveAutoSave();
                         
-                        // 共有機構無効化
-                        // this.sharingManager.publish();
+                        const allRecords = this.model.records;
+                        this.timeSliderUI.show(allRecords);
+
                         this.updateViewRecords();
                         loadModal.style.display = 'none';
+
+                        if (this.view?.showStatusMessage) {
+                            this.view.showStatusMessage("データを復元しました", 2000);
+                        }
                     }
-                } else if (e.target.classList.contains('btn-del-slot')) {
-                    if (confirm("このセーブデータを削除しますか？")) {
+                } 
+                // --- 編集 (Update) ---
+                else if (button.classList.contains('btn-edit-slot')) {
+                    if (targetSave) {
+                        const newTitle = prompt("新しいタイトルを入力してください:", targetSave.title || '');
+                        if (newTitle !== null && newTitle.trim() !== '') {
+                            targetSave.title = newTitle.trim();
+                            targetSave.timestamp = Date.now();
+                            await DBStorage.set('saves', null, targetSave);
+                            await this.renderSaveList();
+                            if (this.view?.showStatusMessage) {
+                                this.view.showStatusMessage("タイトルを更新しました", 2000);
+                            }
+                        }
+                    }
+                } 
+                // --- 削除 (Delete) ---
+                else if (button.classList.contains('btn-del-slot')) {
+                    if (targetSave && confirm(`「${targetSave.title || '無題'}」を削除しますか？`)) {
                         await DBStorage.deleteSave(id);
-                        e.target.closest('.save-item').remove();
+                        await this.renderSaveList();
+                        if (this.view?.showStatusMessage) {
+                            this.view.showStatusMessage("データを削除しました", 2000);
+                        }
                     }
                 }
             });
@@ -575,9 +670,6 @@ export class SkyController {
                 if (confirm("本当に記ろくを消しますか？")) {
                     if (this.currentSelectedRecord) {
                         this.model.deleteRecord(this.currentSelectedRecord);
-                        
-                        // 共有機構無効化
-                        // this.sharingManager.publish();
 
                         const allRecords = this.model.records;
                         this.timeSliderUI.show(allRecords);
@@ -633,8 +725,6 @@ export class SkyController {
                     this.model.resetData();
                     this.view.setCustomMoonImage(null);
                     
-                    // 共有機構無効化
-                    // this.sharingManager.publish();
                     this.updateViewRecords();
                     
                     tooltip.style.display = 'none';
@@ -655,7 +745,6 @@ export class SkyController {
             toggleRadar.addEventListener('change', (e) => {
                 this.view.setRadarVisible(e.target.checked);
             });
-            // 初期状態（ロード時）を反映
             this.view.setRadarVisible(toggleRadar.checked);
         }
 
@@ -677,7 +766,6 @@ export class SkyController {
             });
             sliderContainer.style.display = toggleTimeslider.checked ? 'block' : 'none';
         }
-
     }
 
     startCalibrationCountdown() {
