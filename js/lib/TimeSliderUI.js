@@ -5,13 +5,26 @@ export class TimeSliderUI {
         this.display = document.getElementById('shared-time-display');
         this.ticksContainer = document.getElementById('shared-time-ticks');
         this.marksContainer = document.getElementById('shared-time-marks');
+        this.resetBtn = document.getElementById('reset-time-btn');
         this.onChange = onChange;
+        this.currentRecords = [];
         
         this.slider.addEventListener('input', () => {
             const ts = parseInt(this.slider.value);
             this.updateDisplay(ts);
             this.onChange(ts);
         });
+
+        if (this.resetBtn) {
+            this.resetBtn.addEventListener('click', () => {
+                this.resetToNow();
+            });
+        }
+    }
+
+    resetToNow() {
+        const now = Date.now();
+        this.updateRange(this.currentRecords, now);
     }
 
     updateDisplay(ts) {
@@ -45,34 +58,41 @@ export class TimeSliderUI {
         return new Date(year, month - 1, day, h, m).getTime();
     }
 
-    updateRange(records) {
-        if (records.length === 0) {
-            const now = Date.now();
-            const d = new Date(now);
+    updateRange(records, targetTs = null) {
+        this.currentRecords = records || [];
+        const now = Date.now();
+
+        if (this.currentRecords.length === 0) {
+            const current = targetTs !== null ? targetTs : now;
+            const d = new Date(current);
             // 記録がない場合は当日の午前0時～午後12時(23:59:59)とする
             const minTs = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0).getTime();
             const maxTs = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59).getTime();
             
             this.slider.min = minTs;
             this.slider.max = maxTs;
-            this.slider.value = now;
-            this.updateDisplay(now);
+            this.slider.value = current;
+            this.updateDisplay(current);
             this.updateTicks(minTs, maxTs);
             this.updateMarks([], minTs, maxTs);
-            this.onChange(now);
+            this.onChange(current);
             return;
         }
 
         let minTs = Infinity;
         let maxTs = -Infinity;
-        records.forEach(r => {
+        this.currentRecords.forEach(r => {
             // 修正: parseTimestampメソッドを使用して正しい時刻を取得する
             const ts = this.parseTimestamp(r.dateStr, r.timeStr);
             if (ts < minTs) minTs = ts;
             if (ts > maxTs) maxTs = ts;
         });
         
-        const originalMaxTs = maxTs;
+        const selectedTs = targetTs !== null ? targetTs : maxTs;
+
+        // 指定時刻（現在時刻など）が現在の記録範囲外にあれば範囲を広げる
+        if (selectedTs < minTs) minTs = selectedTs;
+        if (selectedTs > maxTs) maxTs = selectedTs;
         
         // 最古の日付の午前0時に設定
         const minDate = new Date(minTs);
@@ -84,12 +104,12 @@ export class TimeSliderUI {
 
         this.slider.min = minTs;
         this.slider.max = maxTs;
-        this.slider.value = originalMaxTs; 
+        this.slider.value = selectedTs; 
         
-        this.updateDisplay(originalMaxTs);
+        this.updateDisplay(selectedTs);
         this.updateTicks(minTs, maxTs);
-        this.updateMarks(records, minTs, maxTs);
-        this.onChange(originalMaxTs);
+        this.updateMarks(this.currentRecords, minTs, maxTs);
+        this.onChange(selectedTs);
     }
 
     updateMarks(records, minTs, maxTs) {

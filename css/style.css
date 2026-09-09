@@ -418,13 +418,37 @@ button:hover {
     pointer-events: auto;
     box-shadow: 0 4px 10px rgba(0,0,0,0.6);
 }
+
+#shared-time-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: clamp(5px, 1vh, 10px);
+}
+
 #shared-time-display {
     /* フォントサイズを可変に */
     font-size: clamp(14px, 2.5vw, 18px);
-    margin-bottom: clamp(5px, 1vh, 10px);
     color: #00aaff;
     font-weight: bold;
     font-family: monospace;
+}
+
+#reset-time-btn {
+    padding: clamp(3px, 0.8vw, 5px) clamp(8px, 1.2vw, 12px);
+    font-size: clamp(12px, 1.8vw, 14px);
+    background-color: rgba(0, 170, 255, 0.3);
+    border: 1px solid #00aaff;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    margin-right: 0;
+    transition: background-color 0.2s;
+}
+
+#reset-time-btn:hover {
+    background-color: rgba(0, 170, 255, 0.6);
 }
 
 /* スライダーのデフォルトスタイルをリセットしつつ幅を画面いっぱいに */
