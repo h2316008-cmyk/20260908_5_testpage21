@@ -50,7 +50,7 @@
 import { MouseInput } from './MouseInput.js';
 import { MicrobitInput } from './MicrobitInput.js';
 
-import { SharingManager } from './SharingManager.js';
+// import { SharingManager } from './SharingManager.js';
 import { TimeSliderUI } from './TimeSliderUI.js';
 import { DBStorage } from './db.js';
 
@@ -111,7 +111,7 @@ export class SkyController {
 
         this.loadSunCalc();
 
-        this.sharingManager = new SharingManager(this.model, () => this.updateViewRecords());
+        // this.sharingManager = new SharingManager(this.model, () => this.updateViewRecords());
         this.timeSliderUI = new TimeSliderUI((ts) => {
             this.model.filterTimestamp = ts;
             this.updateViewRecords();
@@ -221,7 +221,7 @@ export class SkyController {
         const newRecord = this.model.addRecord(ele, azi, phi, theta, objectName, null, observerName);
         this.currentRecordToDraw = newRecord;
         
-        this.sharingManager.publish();
+        // this.sharingManager.publish();
 
         const allRecords = this.model.isSharedMode 
             ? [...this.model.records, ...this.model.sharedRecords] 
@@ -461,7 +461,7 @@ export class SkyController {
                 }
                 
                 this.model.saveAutoSave();
-                this.sharingManager.publish();
+                // this.sharingManager.publish();
                 this.updateViewRecords();
                 
                 document.getElementById('moon-draw-modal').style.display = 'none';
@@ -546,7 +546,7 @@ export class SkyController {
                         this.model.records = targetSave.records;
                         await this.model.saveAutoSave();
                         
-                        this.sharingManager.publish();
+                        // this.sharingManager.publish();
                         this.updateViewRecords();
                         loadModal.style.display = 'none';
                     }
@@ -575,7 +575,7 @@ export class SkyController {
                     if (this.currentSelectedRecord) {
                         this.model.deleteRecord(this.currentSelectedRecord);
                         
-                        this.sharingManager.publish();
+                        // this.sharingManager.publish();
 
                         const allRecords = this.model.isSharedMode 
                             ? [...this.model.records, ...this.model.sharedRecords] 
@@ -591,6 +591,7 @@ export class SkyController {
             }
         });
 
+        /*
         const shareBtn = document.getElementById('shareBtn');
         if (shareBtn) {
             // 変更: 共有ボタン押下時に非同期で観測者名を入力させるように修正
@@ -623,6 +624,7 @@ export class SkyController {
                 }
             });
         }
+        */
 
         const modeBtn = document.getElementById('modeBtn');
         document.getElementById('connectBtn').addEventListener('click', async () => {
@@ -666,7 +668,7 @@ export class SkyController {
                     this.model.resetData();
                     this.view.setCustomMoonImage(null);
                     
-                    this.sharingManager.publish();
+                    // this.sharingManager.publish();
                     this.updateViewRecords();
                     
                     tooltip.style.display = 'none';
@@ -674,12 +676,14 @@ export class SkyController {
 
                     localStorage.removeItem('sky_camera_view');
 
+                    /*
                     if (shareBtn) {
                         this.model.isSharedMode = false;
                         shareBtn.innerText = 'みんなの記ろくも見る';
                         shareBtn.classList.remove('active-share');
                         this.sharingManager.stopSharing();
                     }
+                    */
                     
                     this.timeSliderUI.show([]);
                     this.updateRecordBtnVisibility();
