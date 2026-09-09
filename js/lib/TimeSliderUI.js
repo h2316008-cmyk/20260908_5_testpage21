@@ -3,6 +3,7 @@ export class TimeSliderUI {
         this.container = document.getElementById('shared-time-slider-container');
         this.slider = document.getElementById('shared-time-slider');
         this.display = document.getElementById('shared-time-display');
+        this.ticksContainer = document.getElementById('shared-time-ticks');
         this.onChange = onChange;
         
         this.slider.addEventListener('input', () => {
@@ -55,6 +56,7 @@ export class TimeSliderUI {
             this.slider.max = maxTs;
             this.slider.value = now;
             this.updateDisplay(now);
+            this.updateTicks(minTs, maxTs);
             this.onChange(now);
             return;
         }
@@ -83,6 +85,62 @@ export class TimeSliderUI {
         this.slider.value = originalMaxTs; 
         
         this.updateDisplay(originalMaxTs);
+        this.updateTicks(minTs, maxTs);
         this.onChange(originalMaxTs);
+    }
+
+    updateTicks(minTs, maxTs) {
+        if (!this.ticksContainer) return;
+        this.ticksContainer.innerHTML = '';
+
+        const totalRange = maxTs - minTs;
+        if (totalRange <= 0) return;
+
+        const days = [];
+        let cur = new Date(minTs);
+        while (cur.getTime() <= maxTs) {
+            days.push(new Date(cur));
+            cur.setDate(cur.getDate() + 1);
+        }
+
+        const dayCount = days.length;
+        let step = 1;
+        if (dayCount > 14) {
+            step = Math.ceil(dayCount / 10);
+        }
+
+        // 各日の区切り線（0:00）を描画
+        days.forEach((d) => {
+            const boundaryTs = d.getTime();
+            const percent = ((boundaryTs - minTs) / totalRange) * 100;
+            if (percent >= 0 && percent <= 100) {
+                const lineEl = document.createElement('div');
+                lineEl.className = 'time-tick-line';
+                lineEl.style.left = `${percent}%`;
+                this.ticksContainer.appendChild(lineEl);
+            }
+        });
+
+        // スライダー右端（最後の日の23:59:59）にも区切り線を描画
+        const endLine = document.createElement('div');
+        endLine.className = 'time-tick-line';
+        endLine.style.left = '100%';
+        this.ticksContainer.appendChild(endLine);
+
+        // 各日の中央（正午 12:00）の位置に日付ラベル（例: 10/1）を描画
+        days.forEach((d, index) => {
+            if (index % step !== 0 && index !== dayCount - 1) return;
+
+            const noonTs = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0).getTime();
+            const percent = ((noonTs - minTs) / totalRange) * 100;
+
+            if (percent >= 0 && percent <= 100) {
+                const labelEl = document.createElement('div');
+                labelEl.className = 'time-tick-label';
+                labelEl.style.left = `${percent}%`;
+                labelEl.innerText = `${d.getMonth() + 1}/${d.getDate()}`;
+                this.ticksContainer.appendChild(labelEl);
+            }
+        });
     }
 }
