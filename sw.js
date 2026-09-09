@@ -1,4 +1,4 @@
-const CACHE_NAME = 'HoshiPita-cache-v3';
+const CACHE_NAME = 'HoshiPita-cache-v5.01'; // ★ バージョンを更新してキャッシュをリフレッシュ
 
 // キャッシュするファイルのリスト
 const urlsToCache = [
@@ -16,7 +16,8 @@ const urlsToCache = [
     './js/lib/MicrobitInput.js',
     './js/lib/SharingManager.js',
     './js/lib/TimeSliderUI.js',
-    './background.jpg',
+    './background_day.jpg',   // ★ 昼用背景画像に変更
+    './background_night.jpg', // ★ 夜用背景画像に変更
     // 外部ライブラリのキャッシュ
     'https://unpkg.com/three@0.142.0/build/three.min.js',
     'https://unpkg.com/three@0.142.0/examples/js/controls/OrbitControls.js',
@@ -71,8 +72,8 @@ self.addEventListener('fetch', (event) => {
                 // キャッシュがなければネットワークへ要求
                 return fetch(event.request)
                     .then((networkResponse) => {
-                        // 正常なレスポンスであれば動的にキャッシュへ追加
-                        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+                        // 正常なレスポンス（同域・CORS対応外部リソース含む）であれば動的にキャッシュへ追加
+                        if (networkResponse && networkResponse.status === 200 && (networkResponse.type === 'basic' || networkResponse.type === 'cors')) {
                             const responseToCache = networkResponse.clone();
                             caches.open(CACHE_NAME).then((cache) => {
                                 cache.put(event.request, responseToCache);

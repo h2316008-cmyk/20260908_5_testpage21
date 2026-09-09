@@ -9,7 +9,14 @@ export class TimeSliderUI {
         this.onChange = onChange;
         this.currentRecords = [];
         
+        // リアルタイム更新（現在時刻追従）用のタイマーと状態
+        this.liveTimer = null;
+        this.isLive = false;
+
         this.slider.addEventListener('input', () => {
+            // ユーザーが手動でスライダーを動かした場合は、現在時刻への追従を解除
+            this.stopLiveMode();
+            
             const ts = parseInt(this.slider.value);
             this.updateDisplay(ts);
             this.onChange(ts);
@@ -20,11 +27,58 @@ export class TimeSliderUI {
                 this.resetToNow();
             });
         }
+
+        // デフォルトは現在時刻（リアルタイム進行状態）で開始
+        this.startLiveMode();
+    }
+
+    // --- リアルタイム（現在時刻）更新モード ---
+    startLiveMode() {
+        if (this.isLive) return;
+        this.isLive = true;
+
+        // 現在時刻に追従している時は「リセットボタン」を隠す
+        if (this.resetBtn) {
+            this.resetBtn.style.display = 'none';
+        }
+
+        // 初回更新
+        const now = Date.now();
+        this.updateRange(this.currentRecords, now);
+
+        // 1秒ごとにスライダーと表示を更新
+        this.liveTimer = setInterval(() => {
+            const currentTs = Date.now();
+            const currentMax = parseInt(this.slider.max);
+
+            // 日付を跨いでスライダーの最大値（23:59:59）を超えた場合は範囲全体を再設定
+            if (currentTs > currentMax) {
+                this.updateRange(this.currentRecords, currentTs);
+            } else {
+                this.slider.value = currentTs;
+                this.updateDisplay(currentTs);
+                this.onChange(currentTs);
+            }
+        }, 1000);
+    }
+
+    stopLiveMode() {
+        this.isLive = false;
+        if (this.liveTimer) {
+            clearInterval(this.liveTimer);
+            this.liveTimer = null;
+        }
+
+        // 手動操作で任意の時間を見ている時は「リセットボタン」を表示する
+        if (this.resetBtn) {
+            // CSSの元のdisplayプロパティ（blockやflexなど）に戻すため空文字を指定
+            this.resetBtn.style.display = ''; 
+        }
     }
 
     resetToNow() {
-        const now = Date.now();
-        this.updateRange(this.currentRecords, now);
+        // 現在時刻に戻した場合は、再びリアルタイム更新を開始する
+        this.startLiveMode();
     }
 
     updateDisplay(ts) {
@@ -32,12 +86,26 @@ export class TimeSliderUI {
         const hours = d.getHours();
         const ampm = hours < 12 ? '午前' : '午後';
         const h12 = hours % 12;
-        this.display.innerText = `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${ampm}${h12}:${d.getMinutes().toString().padStart(2, '0')}`;
+        
+        // 分・秒を2桁でゼロ埋め
+        const minStr = d.getMinutes().toString().padStart(2, '0');
+        const secStr = d.getSeconds().toString().padStart(2, '0');
+        
+        // 秒を含めて表示
+        this.display.innerText = `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${ampm}${h12}:${minStr}:${secStr}`;
     }
 
     show(records) {
         this.container.style.display = 'block';
-        this.updateRange(records);
+        if (!records || records.length === 0) {
+            // 記録がない場合は現在時刻から始まるため、リアルタイム更新をオンにする
+            this.currentRecords = [];
+            this.startLiveMode();
+        } else {
+            // 記録（過去データ）がある場合はリアルタイム更新を停止して範囲を表示
+            this.stopLiveMode();
+            this.updateRange(records);
+        }
     }
 
     hide() {
@@ -82,7 +150,6 @@ export class TimeSliderUI {
         let minTs = Infinity;
         let maxTs = -Infinity;
         this.currentRecords.forEach(r => {
-            // 修正: parseTimestampメソッドを使用して正しい時刻を取得する
             const ts = this.parseTimestamp(r.dateStr, r.timeStr);
             if (ts < minTs) minTs = ts;
             if (ts > maxTs) maxTs = ts;

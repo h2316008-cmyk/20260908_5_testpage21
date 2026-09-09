@@ -94,37 +94,41 @@ export class SkyView {
         // 背景画像用のテクスチャローダーを準備
         const textureLoader = new THREE.TextureLoader();
 
-        // background.pngを読み込み
-        textureLoader.load('background.png', (texture) => {
-            // ★ 背景画像のテクスチャを左右反転させる
+        // 昼用・夜用のテクスチャを保持する変数
+        this.textureDay = null;
+        this.textureNight = null;
+
+        // 背景用のジオメトリとマテリアルを作成（JPEGのため transparent は不要）
+        const bgGeometry = new THREE.SphereGeometry(1050, 64, 32, 0, Math.PI * 2, 0, Math.PI);
+        this.bgMaterial = new THREE.MeshBasicMaterial({
+            side: THREE.BackSide, 
+            depthWrite: false
+        });
+
+        const backgroundSphere = new THREE.Mesh(bgGeometry, this.bgMaterial);
+        backgroundSphere.rotation.y = Math.PI * 1.5;
+        this.scene.add(backgroundSphere);
+
+        // 昼用の背景画像（JPEG）を読み込み
+        textureLoader.load('img/background_day.jpg', (texture) => {
             texture.wrapS = THREE.RepeatWrapping;
             texture.repeat.x = -1;
+            this.textureDay = texture;
+            if (this.isDayMode) {
+                this.bgMaterial.map = this.textureDay;
+                this.bgMaterial.needsUpdate = true;
+            }
+        });
 
-            const bgGeometry = new THREE.SphereGeometry(
-                1050,           // 半径 (ワイヤーフレームより少し大きくする)
-                64,             // 水平方向の分割数
-                32,             // 垂直方向の分割数
-                0,              // 水平方向の開始角度
-                Math.PI * 2,    // 水平方向の描画角度 (360度)
-                0,              // 垂直方向の開始角度 (天頂)
-                Math.PI         // 垂直方向の描画角度 (180度 = 全球)
-            );
-
-            const bgMaterial = new THREE.MeshBasicMaterial({
-                map: texture,
-                side: THREE.BackSide, // 天球の内側から見るため BackSide を指定
-                transparent: true,    // 透過部分の背景色（昼: 水色 / 夜: 紺色）を表示するためtrueに設定
-                depthWrite: false     // 天球内のワイヤーフレームや星描画の深度干渉を防ぐ
-            });
-
-            const backgroundSphere = new THREE.Mesh(bgGeometry, bgMaterial);
-            
-            // Y軸方向に270度（Math.PI * 1.5 ラジアン）回転
-            backgroundSphere.rotation.y = Math.PI * 1.5;
-            
-            this.scene.add(backgroundSphere);
-        }, undefined, function (error) {
-            console.error('背景画像の読み込みに失敗しました:', error);
+        // 夜用の背景画像（JPEG）を読み込み
+        textureLoader.load('img/background_night.jpg', (texture) => {
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.repeat.x = -1;
+            this.textureNight = texture;
+            if (!this.isDayMode) {
+                this.bgMaterial.map = this.textureNight;
+                this.bgMaterial.needsUpdate = true;
+            }
         });
 
         const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.paniniMaterial);
@@ -191,10 +195,17 @@ export class SkyView {
     setDayNightMode(isDay) {
         if (this.isDayMode === isDay) return; 
         this.isDayMode = isDay;
+        
         if (isDay) {
-            this.renderer.setClearColor(0x87CEEB, 1); 
+            if (this.textureDay && this.bgMaterial) {
+                this.bgMaterial.map = this.textureDay;
+                this.bgMaterial.needsUpdate = true;
+            }
         } else {
-            this.renderer.setClearColor(0x00081a, 1); 
+            if (this.textureNight && this.bgMaterial) {
+                this.bgMaterial.map = this.textureNight;
+                this.bgMaterial.needsUpdate = true;
+            }
         }
     }
 
