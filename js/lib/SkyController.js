@@ -379,6 +379,7 @@ export class SkyController {
         const canvas = document.getElementById('moon-canvas');
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
+        const colorPicker = document.getElementById('moon-color-picker');
         let isDrawing = false;
         let lastPos = { x: 0, y: 0 };
 
@@ -395,7 +396,7 @@ export class SkyController {
             lastPos = getCanvasCoords(e);
             
             ctx.beginPath();
-            ctx.fillStyle = '#ffff77';
+            ctx.fillStyle = colorPicker ? colorPicker.value : '#ffff77';
             ctx.arc(lastPos.x, lastPos.y, 12, 0, Math.PI * 2);
             ctx.fill();
         };
@@ -405,7 +406,7 @@ export class SkyController {
             const currentPos = getCanvasCoords(e);
             
             ctx.beginPath();
-            ctx.strokeStyle = '#ffff77';
+            ctx.strokeStyle = colorPicker ? colorPicker.value : '#ffff77';
             ctx.lineWidth = 24;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
@@ -455,6 +456,7 @@ export class SkyController {
                 
                 if (this.currentRecordToDraw) {
                     this.currentRecordToDraw.moonImageData = dataUrl;
+                    this.currentRecordToDraw.moonColor = colorPicker ? colorPicker.value : '#ffff77';
                 }
                 
                 this.model.saveAutoSave();

@@ -63,7 +63,7 @@ export class SkyModel {
         }
     }
     
-    addRecord(elevation, azimuth, phi, theta, name = "", moonImageData = null, observerName = "") {
+    addRecord(elevation, azimuth, phi, theta, name = "", moonImageData = null, observerName = "", moonColor = null) {
         const now = new Date();
         const hours = now.getHours();
         const ampm = hours < 12 ? '午前' : '午後';
@@ -77,7 +77,8 @@ export class SkyModel {
             azimuth: azimuth,
             phi: phi,
             theta: theta,
-            moonImageData: moonImageData 
+            moonImageData: moonImageData,
+            moonColor: moonColor
         };
         this.records.push(newRecord);
         // 記録追加時に自動保存
