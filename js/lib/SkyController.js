@@ -50,6 +50,7 @@
 import { MouseInput } from './MouseInput.js';
 import { MicrobitInput } from './MicrobitInput.js';
 
+// 共有機構無効化
 // import { SharingManager } from './SharingManager.js';
 import { TimeSliderUI } from './TimeSliderUI.js';
 import { DBStorage } from './db.js';
@@ -111,6 +112,7 @@ export class SkyController {
 
         this.loadSunCalc();
 
+        // 共有機構無効化
         // this.sharingManager = new SharingManager(this.model, () => this.updateViewRecords());
         this.timeSliderUI = new TimeSliderUI((ts) => {
             this.model.filterTimestamp = ts;
@@ -131,7 +133,6 @@ export class SkyController {
                 const nameDisplay = data.name ? `<strong>天体名:</strong> ${data.name}<br>` : "";
                 
                 // 共有機能無効化に伴い観察者名の表示をオフ
-                // const observerDisplay = (this.model.isSharedMode && data.observerName) ? `<strong>観察者:</strong> ${data.observerName}<br>` : "";
                 const observerDisplay = "";
 
                 tooltip.innerHTML = `${nameDisplay}${observerDisplay}<strong>日時:</strong> ${dateDisplay}${data.timeStr}<br>
@@ -215,19 +216,15 @@ export class SkyController {
             if (!objectName) return; 
         }
 
-        // 変更: 観測者名の入力をここでは行わない（共有時に行うため）
         const observerName = this.model.observerName || "";
 
         // 記録を追加し、描画対象として保持
         const newRecord = this.model.addRecord(ele, azi, phi, theta, objectName, null, observerName);
         this.currentRecordToDraw = newRecord;
         
+        // 共有機構無効化
         // this.sharingManager.publish();
 
-        // 共有機能無効化
-        // const allRecords = this.model.isSharedMode 
-        //     ? [...this.model.records, ...this.model.sharedRecords] 
-        //     : this.model.records;
         const allRecords = this.model.records;
         this.timeSliderUI.show(allRecords);
 
@@ -250,12 +247,7 @@ export class SkyController {
     }
 
     updateViewRecords() {
-        // 共有機能無効化
-        // const allRecords = this.model.isSharedMode 
-        //     ? [...this.model.records, ...this.model.sharedRecords] 
-        //     : this.model.records;
         const allRecords = this.model.records;
-            
         this.view.drawRecords(allRecords, this.model.isSharedMode, this.model.filterTimestamp);
     }
 
@@ -466,6 +458,7 @@ export class SkyController {
                 }
                 
                 this.model.saveAutoSave();
+                // 共有機構無効化
                 // this.sharingManager.publish();
                 this.updateViewRecords();
                 
@@ -551,6 +544,7 @@ export class SkyController {
                         this.model.records = targetSave.records;
                         await this.model.saveAutoSave();
                         
+                        // 共有機構無効化
                         // this.sharingManager.publish();
                         this.updateViewRecords();
                         loadModal.style.display = 'none';
@@ -580,12 +574,9 @@ export class SkyController {
                     if (this.currentSelectedRecord) {
                         this.model.deleteRecord(this.currentSelectedRecord);
                         
+                        // 共有機構無効化
                         // this.sharingManager.publish();
 
-                        // 共有機能無効化
-                        // const allRecords = this.model.isSharedMode 
-                        //     ? [...this.model.records, ...this.model.sharedRecords] 
-                        //     : this.model.records;
                         const allRecords = this.model.records;
                         this.timeSliderUI.show(allRecords);
                         
@@ -597,41 +588,6 @@ export class SkyController {
                 }
             }
         });
-
-        /*
-        const shareBtn = document.getElementById('shareBtn');
-        if (shareBtn) {
-            // 変更: 共有ボタン押下時に非同期で観測者名を入力させるように修正
-            shareBtn.addEventListener('click', async () => {
-                if (!this.model.isSharedMode) {
-                    // 共有モードを開始する際に観測者名を入力
-                    const observerName = await this.customPrompt("名前をかきましょう。", "");
-                    if (!observerName) return; 
-
-                    this.model.observerName = observerName;
-                    
-                    // 自分のすべての記録に観測者名を設定
-                    this.model.records.forEach(r => r.observerName = observerName);
-                    this.model.saveAutoSave();
-
-                    this.model.isSharedMode = true;
-                    shareBtn.innerText = '自分の記ろくにもどす';
-                    shareBtn.classList.add('active-share');
-                    this.sharingManager.startSharing();
-                    this.timeSliderUI.show([...this.model.records, ...this.model.sharedRecords]);
-                } else {
-                    this.model.isSharedMode = false;
-                    shareBtn.innerText = 'みんなの記ろくも見る';
-                    shareBtn.classList.remove('active-share');
-                    this.sharingManager.stopSharing();
-                    
-                    this.timeSliderUI.show(this.model.records);
-                    
-                    this.updateViewRecords();
-                }
-            });
-        }
-        */
 
         const modeBtn = document.getElementById('modeBtn');
         document.getElementById('connectBtn').addEventListener('click', async () => {
@@ -675,6 +631,7 @@ export class SkyController {
                     this.model.resetData();
                     this.view.setCustomMoonImage(null);
                     
+                    // 共有機構無効化
                     // this.sharingManager.publish();
                     this.updateViewRecords();
                     
@@ -683,15 +640,6 @@ export class SkyController {
 
                     localStorage.removeItem('sky_camera_view');
 
-                    /*
-                    if (shareBtn) {
-                        this.model.isSharedMode = false;
-                        shareBtn.innerText = 'みんなの記ろくも見る';
-                        shareBtn.classList.remove('active-share');
-                        this.sharingManager.stopSharing();
-                    }
-                    */
-                    
                     this.timeSliderUI.show([]);
                     this.updateRecordBtnVisibility();
                 }
@@ -701,32 +649,32 @@ export class SkyController {
         this.updateRecordBtnVisibility();
 
         const toggleRadar = document.getElementById('toggle-radar');
-    if (toggleRadar) {
-    toggleRadar.addEventListener('change', (e) => {
-        this.view.setRadarVisible(e.target.checked);
-    });
-    // 初期状態（ロード時）を反映
-    this.view.setRadarVisible(toggleRadar.checked);
-    }
+        if (toggleRadar) {
+            toggleRadar.addEventListener('change', (e) => {
+                this.view.setRadarVisible(e.target.checked);
+            });
+            // 初期状態（ロード時）を反映
+            this.view.setRadarVisible(toggleRadar.checked);
+        }
 
-    // 方角の表示切替
-const toggleDirection = document.getElementById('toggle-direction');
-if (toggleDirection) {
-    toggleDirection.addEventListener('change', (e) => {
-        this.view.setDirectionVisible(e.target.checked);
-    });
-    this.view.setDirectionVisible(toggleDirection.checked);
-}
+        // 方角の表示切替
+        const toggleDirection = document.getElementById('toggle-direction');
+        if (toggleDirection) {
+            toggleDirection.addEventListener('change', (e) => {
+                this.view.setDirectionVisible(e.target.checked);
+            });
+            this.view.setDirectionVisible(toggleDirection.checked);
+        }
 
-// タイムスライダーの表示切替
-const toggleTimeslider = document.getElementById('toggle-timeslider');
-const sliderContainer = document.getElementById('shared-time-slider-container');
-if (toggleTimeslider && sliderContainer) {
-    toggleTimeslider.addEventListener('change', (e) => {
-        sliderContainer.style.display = e.target.checked ? 'block' : 'none';
-    });
-    sliderContainer.style.display = toggleTimeslider.checked ? 'block' : 'none';
-}
+        // タイムスライダーの表示切替
+        const toggleTimeslider = document.getElementById('toggle-timeslider');
+        const sliderContainer = document.getElementById('shared-time-slider-container');
+        if (toggleTimeslider && sliderContainer) {
+            toggleTimeslider.addEventListener('change', (e) => {
+                sliderContainer.style.display = e.target.checked ? 'block' : 'none';
+            });
+            sliderContainer.style.display = toggleTimeslider.checked ? 'block' : 'none';
+        }
 
     }
 
