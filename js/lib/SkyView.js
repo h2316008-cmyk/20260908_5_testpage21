@@ -15,8 +15,11 @@ export class SkyView {
         this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
         this.controls.target.set(0, 1.6, 0);
         
+        // 変更箇所：
+        // 回転スピードを小さくして、少しずつ動くようにする（数値を -0.5 などに変更）
         this.controls.rotateSpeed = -0.5; 
         
+        // 慣性（滑るような動き）を無効にし、指で動かした分だけピタッと止まるようにする
         this.controls.enableDamping = false; 
         
         this.controls.enableZoom = false;
@@ -30,6 +33,7 @@ export class SkyView {
         this.paniniScene = new THREE.Scene();
         this.paniniCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
+        // --- 球面（ステレオ）投影シェーダー ---
         this.paniniMaterial = new THREE.ShaderMaterial({
             uniforms: {
                 tDiffuse: { value: this.renderTarget.texture },
@@ -87,30 +91,35 @@ export class SkyView {
             depthWrite: false
         });
 
+        // 背景画像用のテクスチャローダーを準備
         const textureLoader = new THREE.TextureLoader();
 
+        // background.jpgを読み込み
         textureLoader.load('background.jpg', (texture) => {
+            // ★ 背景画像のテクスチャを左右反転させる
             texture.wrapS = THREE.RepeatWrapping;
             texture.repeat.x = -1;
 
             const bgGeometry = new THREE.SphereGeometry(
-                1050,           
-                64,             
-                32,             
-                0,              
-                Math.PI * 2,    
-                0,              
-                Math.PI         
+                1050,           // 半径 (ワイヤーフレームより少し大きくする)
+                64,             // 水平方向の分割数
+                32,             // 垂直方向の分割数
+                0,              // 水平方向の開始角度
+                Math.PI * 2,    // 水平方向の描画角度 (360度)
+                0,              // 垂直方向の開始角度 (天頂)
+                Math.PI         // 垂直方向の描画角度 (180度 = 全球)
             );
 
             const bgMaterial = new THREE.MeshBasicMaterial({
                 map: texture,
-                side: THREE.BackSide, 
-                depthWrite: false     
+                side: THREE.BackSide, // 天球の内側から見るため BackSide を指定
+                // transparent と opacity を削除（または false に設定）して完全に不透明にし、元の茶色背景を遮断
+                depthWrite: false     // 天球内のワイヤーフレームや星描画の深度干渉を防ぐ
             });
 
             const backgroundSphere = new THREE.Mesh(bgGeometry, bgMaterial);
             
+            // Y軸方向に270度（Math.PI * 1.5 ラジアン）回転
             backgroundSphere.rotation.y = Math.PI * 1.5;
             
             this.scene.add(backgroundSphere);
@@ -142,7 +151,7 @@ export class SkyView {
 
         this.customMoonTexture = null;
         this.lastRecords = [];
-        this.textureCache = {}; 
+        this.textureCache = {}; // 個別の月のテクスチャをキャッシュするためのオブジェクト
 
         this.initHUD();
         this.createEnvironment();
@@ -175,7 +184,7 @@ export class SkyView {
             ]),
             new THREE.LineBasicMaterial({ color: 0xffffff })
         );
-        this.crosshair = crosshair; 
+        this.crosshair = crosshair; // 非表示制御のために保存
         this.hudScene.add(crosshair);
     }
 
@@ -240,7 +249,7 @@ export class SkyView {
         ];
         groundGroup.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(crossPoints), guideMat));
 
-        this.directionLabels = []; 
+        this.directionLabels = []; // 非表示制御のために保存
         this.directions.forEach(d => {
             const label = this.createTextSprite(d.n, '#00ff00', 100);
             const rad = d.a * (Math.PI / 180);
@@ -273,6 +282,7 @@ export class SkyView {
         this._statusMessageTimer = setTimeout(() => { el.style.display = 'none'; }, autoHideMs);
     }
     
+    // 追加: 日本語の「午前/午後」を含む日時文字列をタイムスタンプに変換するヘルパー
     parseTimestamp(dateStr, timeStr) {
         const [year, month, day] = dateStr.split('/').map(Number);
         const ampm = timeStr.substring(0, 2);
@@ -285,14 +295,14 @@ export class SkyView {
         return new Date(year, month - 1, day, h, m).getTime();
     }
 
-    // 共有・フィルター機能無効化に伴いシグネチャを変更
-    drawRecords(records) {
+    drawRecords(records, isSharedMode = false, filterTimestamp = null) {
         this.lastRecords = records;
         while(this.recordGroup.children.length > 0) { 
             const child = this.recordGroup.children[0];
             this.recordGroup.remove(child);
             
             if(child.material && child.material.map && child.material.map !== this.customMoonTexture) {
+                // キャッシュされている個別の月のテクスチャは破棄しない
                 let isCached = false;
                 for (let key in this.textureCache) {
                     if (this.textureCache[key] === child.material.map) {
@@ -315,11 +325,13 @@ export class SkyView {
             let scaleMultiplier = 1;
 
             if (rec.name === '月' && rec.moonImageData) {
+                // 個別の月の画像が存在する場合はキャッシュから取得、または新規読み込み
                 if (!this.textureCache[rec.moonImageData]) {
                     this.textureCache[rec.moonImageData] = new THREE.TextureLoader().load(rec.moonImageData);
                 }
                 moonTexture = this.textureCache[rec.moonImageData];
             } else if (rec.name === '月' && this.customMoonTexture) {
+                // 過去バージョン互換のためのフォールバック
                 moonTexture = this.customMoonTexture;
             } else {
                 const canvasMoon = document.createElement('canvas');
@@ -349,9 +361,25 @@ export class SkyView {
                 moonTexture = new THREE.CanvasTexture(canvasMoon);
             }
 
+            // ★ 修正: depthTest を false にして深度を無視させる
             const moonMaterial = new THREE.SpriteMaterial({ map: moonTexture, transparent: true, depthTest: false });
 
+            // 修正: 共有モードかどうかにかかわらず、タイムスライダーのフィルターを適用
+            if (filterTimestamp !== null) {
+                // 修正: parseTimestampメソッドを使用して正しい時刻を取得する
+                const recTime = this.parseTimestamp(rec.dateStr, rec.timeStr);
+                const diff = Math.abs(recTime - filterTimestamp);
+                
+                // スライダーの時間から前後30分(1800000ミリ秒)を外れた記録はグレーアウトする
+                if (diff > 1800000) {
+                    moonMaterial.color.setHex(0x555555);
+                    moonMaterial.opacity = 0.15;
+                }
+            }
+
             const recordMark = new THREE.Sprite(moonMaterial);
+            
+            // ★ 修正: ワイヤーフレームの手前に強制的に描画するために renderOrder を最大化する
             recordMark.renderOrder = 999;
             
             const currentSize = moonSize * scaleMultiplier;
@@ -369,7 +397,7 @@ export class SkyView {
             recordMark.userData = {
                 isRecord: true,
                 name: rec.name || "", 
-                observerName: rec.observerName || "", 
+                observerName: rec.observerName || "", // 追記: クリック用データに観測者名を渡す
                 dateStr: rec.dateStr, 
                 timeStr: rec.timeStr,
                 elevation: rec.elevation,
@@ -378,8 +406,11 @@ export class SkyView {
             this.recordGroup.add(recordMark);
 
             const timeLabel = this.createTextSprite(rec.timeStr, '#ffffff', 100);
+            
+            // ★ 修正: 時刻のラベルも最前面に出すために追加
             timeLabel.material.depthTest = false;
             timeLabel.renderOrder = 999;
+            
             timeLabel.scale.set(120, 30, 1); 
 
             const offsetPhi = (currentSize + 30) / 990;
@@ -391,6 +422,16 @@ export class SkyView {
                 990 * Math.sin(labelPhi) * Math.sin(currentTheta)
             );
             
+            // 修正: 共有モードかどうかにかかわらず、タイムスライダーのフィルターを適用
+            if (filterTimestamp !== null) {
+                // 修正: parseTimestampメソッドを使用して正しい時刻を取得する
+                const recTime = this.parseTimestamp(rec.dateStr, rec.timeStr);
+                if (Math.abs(recTime - filterTimestamp) > 1800000) {
+                    timeLabel.material.color.setHex(0x555555);
+                    timeLabel.material.opacity = 0.15;
+                }
+            }
+
             this.recordGroup.add(timeLabel);
         });
     }
@@ -422,6 +463,7 @@ export class SkyView {
     setRadarVisible(isVisible) {
         if (this.crosshair) this.crosshair.visible = isVisible;
         
+        // 親コンテナごと消すとステータスメッセージも消えてしまうため、個別のラベルを制御
         const azLabel = document.getElementById('label-azimuth');
         const elLabel = document.getElementById('label-elevation');
         
