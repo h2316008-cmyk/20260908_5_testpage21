@@ -130,8 +130,9 @@ export class SkyController {
                 const dateDisplay = data.dateStr ? `${data.dateStr} ` : ""; 
                 const nameDisplay = data.name ? `<strong>天体名:</strong> ${data.name}<br>` : "";
                 
-                // 変更: 共有モードのときのみ観測者名を表示する
-                const observerDisplay = (this.model.isSharedMode && data.observerName) ? `<strong>観察者:</strong> ${data.observerName}<br>` : "";
+                // 共有機能無効化に伴い観察者名の表示をオフ
+                // const observerDisplay = (this.model.isSharedMode && data.observerName) ? `<strong>観察者:</strong> ${data.observerName}<br>` : "";
+                const observerDisplay = "";
 
                 tooltip.innerHTML = `${nameDisplay}${observerDisplay}<strong>日時:</strong> ${dateDisplay}${data.timeStr}<br>
                                      <strong>高度:</strong> ${data.elevation.toFixed(1)}°<br>
@@ -223,9 +224,11 @@ export class SkyController {
         
         // this.sharingManager.publish();
 
-        const allRecords = this.model.isSharedMode 
-            ? [...this.model.records, ...this.model.sharedRecords] 
-            : this.model.records;
+        // 共有機能無効化
+        // const allRecords = this.model.isSharedMode 
+        //     ? [...this.model.records, ...this.model.sharedRecords] 
+        //     : this.model.records;
+        const allRecords = this.model.records;
         this.timeSliderUI.show(allRecords);
 
         this.updateViewRecords();
@@ -247,9 +250,11 @@ export class SkyController {
     }
 
     updateViewRecords() {
-        const allRecords = this.model.isSharedMode 
-            ? [...this.model.records, ...this.model.sharedRecords] 
-            : this.model.records;
+        // 共有機能無効化
+        // const allRecords = this.model.isSharedMode 
+        //     ? [...this.model.records, ...this.model.sharedRecords] 
+        //     : this.model.records;
+        const allRecords = this.model.records;
             
         this.view.drawRecords(allRecords, this.model.isSharedMode, this.model.filterTimestamp);
     }
@@ -577,9 +582,11 @@ export class SkyController {
                         
                         // this.sharingManager.publish();
 
-                        const allRecords = this.model.isSharedMode 
-                            ? [...this.model.records, ...this.model.sharedRecords] 
-                            : this.model.records;
+                        // 共有機能無効化
+                        // const allRecords = this.model.isSharedMode 
+                        //     ? [...this.model.records, ...this.model.sharedRecords] 
+                        //     : this.model.records;
+                        const allRecords = this.model.records;
                         this.timeSliderUI.show(allRecords);
                         
                         this.updateViewRecords();

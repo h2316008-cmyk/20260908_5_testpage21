@@ -22,8 +22,9 @@ export class SkyModel {
         }
         this.clientId = savedClientId;
 
-        this.sharedRecords = [];
-        this.isSharedMode = false;
+        // 共有機能無効化に伴いコメントアウト
+        // this.sharedRecords = [];
+        // this.isSharedMode = false;
         this.filterTimestamp = null;
 
         // 初期化時にオートセーブデータを読み込む
@@ -101,49 +102,50 @@ export class SkyModel {
             deleted = true;
         }
 
+        // 共有機能無効化のためコメントアウト
         // ★修正: 共有データ領域 (localStorage) からも探して確実に削除する
-        const sharedDataStr = localStorage.getItem('sky_shared_data');
-        if (sharedDataStr) {
-            try {
-                let sharedData = JSON.parse(sharedDataStr);
-                let sharedModified = false;
-                for (let key in sharedData) {
-                    let clientRecords = sharedData[key].records;
-                    const sIndex = clientRecords.findIndex(r => 
-                        r.name === targetData.name &&
-                        r.dateStr === targetData.dateStr &&
-                        r.timeStr === targetData.timeStr &&
-                        r.elevation === targetData.elevation &&
-                        r.azimuth === targetData.azimuth
-                    );
-                    if (sIndex !== -1) {
-                        clientRecords.splice(sIndex, 1);
-                        sharedModified = true;
-                        deleted = true;
-                    }
-                    if (clientRecords.length === 0) {
-                        delete sharedData[key];
-                    }
-                }
-                if (sharedModified) {
-                    localStorage.setItem('sky_shared_data', JSON.stringify(sharedData));
-                }
-            } catch (e) {
-                console.error("共有データの削除中にエラーが発生しました:", e);
-            }
-        }
+        // const sharedDataStr = localStorage.getItem('sky_shared_data');
+        // if (sharedDataStr) {
+        //     try {
+        //         let sharedData = JSON.parse(sharedDataStr);
+        //         let sharedModified = false;
+        //         for (let key in sharedData) {
+        //             let clientRecords = sharedData[key].records;
+        //             const sIndex = clientRecords.findIndex(r => 
+        //                 r.name === targetData.name &&
+        //                 r.dateStr === targetData.dateStr &&
+        //                 r.timeStr === targetData.timeStr &&
+        //                 r.elevation === targetData.elevation &&
+        //                 r.azimuth === targetData.azimuth
+        //             );
+        //             if (sIndex !== -1) {
+        //                 clientRecords.splice(sIndex, 1);
+        //                 sharedModified = true;
+        //                 deleted = true;
+        //             }
+        //             if (clientRecords.length === 0) {
+        //                 delete sharedData[key];
+        //             }
+        //         }
+        //         if (sharedModified) {
+        //             localStorage.setItem('sky_shared_data', JSON.stringify(sharedData));
+        //         }
+        //     } catch (e) {
+        //         console.error("共有データの削除中にエラーが発生しました:", e);
+        //     }
+        // }
 
         // 現在の sharedRecords リストからも削除
-        const sIdx = this.sharedRecords.findIndex(r => 
-            r.name === targetData.name &&
-            r.dateStr === targetData.dateStr &&
-            r.timeStr === targetData.timeStr &&
-            r.elevation === targetData.elevation &&
-            r.azimuth === targetData.azimuth
-        );
-        if (sIdx !== -1) {
-            this.sharedRecords.splice(sIdx, 1);
-        }
+        // const sIdx = this.sharedRecords.findIndex(r => 
+        //     r.name === targetData.name &&
+        //     r.dateStr === targetData.dateStr &&
+        //     r.timeStr === targetData.timeStr &&
+        //     r.elevation === targetData.elevation &&
+        //     r.azimuth === targetData.azimuth
+        // );
+        // if (sIdx !== -1) {
+        //     this.sharedRecords.splice(sIdx, 1);
+        // }
 
         return deleted;
     }
@@ -178,9 +180,10 @@ export class SkyModel {
     // すべてのデータを消去してリセットする
     resetData() {
         this.records = [];
-        this.sharedRecords = [];
+        // this.sharedRecords = [];
         this.moonImageData = null;
         localStorage.removeItem('sky_autosave_data');
-        localStorage.removeItem('sky_shared_data'); // ★修正: 全データ消去時に共有のゴミデータも消去
+        // 共有機能無効化のためコメントアウト
+        // localStorage.removeItem('sky_shared_data'); // ★修正: 全データ消去時に共有のゴミデータも消去
     }
 }
