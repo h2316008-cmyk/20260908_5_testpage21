@@ -813,16 +813,6 @@ export class SkyController {
     
     updateClockUI() {
         const now = new Date();
-        const d = document.getElementById('date'), c = document.getElementById('clock');
-        if (d) d.innerText = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()}`;
-        if (c) {
-            const hours = now.getHours();
-            const ampm = hours < 12 ? '午前' : '午後';
-            const h12 = hours % 12;
-            const m = now.getMinutes().toString().padStart(2, '0');
-            const s = now.getSeconds().toString().padStart(2, '0');
-            c.innerText = `${ampm}${h12}:${m}:${s}`;
-        }
         this.view.setDayNightMode(now.getHours() + (now.getMinutes() / 60) >= 5.0 && now.getHours() + (now.getMinutes() / 60) < 18.5);
     }
 }
