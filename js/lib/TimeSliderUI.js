@@ -4,6 +4,7 @@ export class TimeSliderUI {
         this.slider = document.getElementById('shared-time-slider');
         this.display = document.getElementById('shared-time-display');
         this.ticksContainer = document.getElementById('shared-time-ticks');
+        this.marksContainer = document.getElementById('shared-time-marks');
         this.onChange = onChange;
         
         this.slider.addEventListener('input', () => {
@@ -57,6 +58,7 @@ export class TimeSliderUI {
             this.slider.value = now;
             this.updateDisplay(now);
             this.updateTicks(minTs, maxTs);
+            this.updateMarks([], minTs, maxTs);
             this.onChange(now);
             return;
         }
@@ -86,7 +88,27 @@ export class TimeSliderUI {
         
         this.updateDisplay(originalMaxTs);
         this.updateTicks(minTs, maxTs);
+        this.updateMarks(records, minTs, maxTs);
         this.onChange(originalMaxTs);
+    }
+
+    updateMarks(records, minTs, maxTs) {
+        if (!this.marksContainer) return;
+        this.marksContainer.innerHTML = '';
+
+        const totalRange = maxTs - minTs;
+        if (totalRange <= 0) return;
+
+        records.forEach(r => {
+            const ts = this.parseTimestamp(r.dateStr, r.timeStr);
+            const percent = ((ts - minTs) / totalRange) * 100;
+            if (percent >= 0 && percent <= 100) {
+                const markEl = document.createElement('div');
+                markEl.className = 'time-record-mark';
+                markEl.style.left = `${percent}%`;
+                this.marksContainer.appendChild(markEl);
+            }
+        });
     }
 
     updateTicks(minTs, maxTs) {
