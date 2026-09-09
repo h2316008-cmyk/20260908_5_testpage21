@@ -318,7 +318,8 @@ export class SkyView {
             if(child.material) child.material.dispose();
         }
 
-        const moonSize = 25; 
+        // 天体画像の基本サイズを小さく変更
+        const moonSize = 20; 
 
         records.forEach(rec => {
             let moonTexture;
@@ -405,15 +406,18 @@ export class SkyView {
             };
             this.recordGroup.add(recordMark);
 
-            const timeLabel = this.createTextSprite(rec.timeStr, '#ffffff', 100);
+            // 時刻ラベルのベースフォントサイズを大きく変更
+            const timeLabel = this.createTextSprite(rec.timeStr, '#ffffff', 140);
             
             // ★ 修正: 時刻のラベルも最前面に出すために追加
             timeLabel.material.depthTest = false;
             timeLabel.renderOrder = 999;
             
-            timeLabel.scale.set(120, 30, 1); 
+            // 時刻ラベルの表示スケールを大きく変更
+            timeLabel.scale.set(160, 40, 1); 
 
-            const offsetPhi = (currentSize + 30) / 990;
+            // 画像のサイズ変更に合わせてオフセットを調整
+            const offsetPhi = (currentSize + 35) / 990;
             const labelPhi = rec.phi + offsetPhi;
             
             timeLabel.position.set(
