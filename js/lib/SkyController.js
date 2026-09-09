@@ -812,7 +812,8 @@ export class SkyController {
     }
     
     updateClockUI() {
-        const now = new Date();
-        this.view.setDayNightMode(now.getHours() + (now.getMinutes() / 60) >= 5.0 && now.getHours() + (now.getMinutes() / 60) < 18.5);
+        const targetDate = this.model.filterTimestamp ? new Date(this.model.filterTimestamp) : new Date();
+        const hours = targetDate.getHours() + (targetDate.getMinutes() / 60);
+        this.view.setDayNightMode(hours >= 5.0 && hours < 18.5);
     }
 }
