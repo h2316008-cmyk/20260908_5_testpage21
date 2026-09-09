@@ -453,7 +453,7 @@ export class SkyController {
                 
                 if (this.currentRecordToDraw) {
                     this.currentRecordToDraw.moonImageData = dataUrl;
-                    this.currentRecordToDraw.moonColor = colorPicker ? colorPicker.value : '#ffff77';
+                    this.currentRecordToDraw.moonColor = colorPicker ? colorPicker.value : '#ffffbb';
                 }
                 
                 this.model.saveAutoSave();
