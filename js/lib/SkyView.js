@@ -155,6 +155,8 @@ export class SkyView {
 
         this.customMoonTexture = null;
         this.lastRecords = [];
+        this.lastIsSharedMode = false;
+        this.lastFilterTimestamp = null;
         this.textureCache = {}; // 個別の月のテクスチャをキャッシュするためのオブジェクト
 
         this.initHUD();
@@ -169,7 +171,7 @@ export class SkyView {
                 this.customMoonTexture = null;
             }
             if (this.lastRecords) {
-                this.drawRecords(this.lastRecords);
+                this.drawRecords(this.lastRecords, this.lastIsSharedMode, this.lastFilterTimestamp);
             }
         }
     }
@@ -206,6 +208,11 @@ export class SkyView {
                 this.bgMaterial.map = this.textureNight;
                 this.bgMaterial.needsUpdate = true;
             }
+        }
+
+        // 昼夜モード切り替え時に記録の日時テキストの色を更新して再描画
+        if (this.lastRecords && this.lastRecords.length > 0) {
+            this.drawRecords(this.lastRecords, this.lastIsSharedMode, this.lastFilterTimestamp);
         }
     }
 
@@ -308,6 +315,9 @@ export class SkyView {
 
     drawRecords(records, isSharedMode = false, filterTimestamp = null) {
         this.lastRecords = records;
+        this.lastIsSharedMode = isSharedMode;
+        this.lastFilterTimestamp = filterTimestamp;
+
         while(this.recordGroup.children.length > 0) { 
             const child = this.recordGroup.children[0];
             this.recordGroup.remove(child);
@@ -418,8 +428,10 @@ export class SkyView {
             this.recordGroup.add(recordMark);
 
             // 日時ラベルの作成（日付と時刻を表示）
+            // 背景が昼（水色）の場合は黒文字、夜（紺色）の場合は白文字にする
             const labelText = rec.dateStr ? `${rec.dateStr} ${rec.timeStr}` : rec.timeStr;
-            const timeLabel = this.createTextSprite(labelText, '#ffffff', 100);
+            const textColor = this.isDayMode ? '#000000' : '#ffffff';
+            const timeLabel = this.createTextSprite(labelText, textColor, 100);
             
             // ★ 修正: 時刻のラベルも最前面に出すために追加
             timeLabel.material.depthTest = false;
