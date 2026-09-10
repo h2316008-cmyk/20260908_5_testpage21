@@ -124,6 +124,12 @@
         </div>
     </div>
 
+    <!-- 追加: キャリブレーション中の表示 -->
+    <div id="calibration-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background-color:rgba(0,0,10,0.8); z-index:9999; flex-direction:column; justify-content:center; align-items:center; color:white; pointer-events:none;">
+        <div style="font-size:clamp(24px, 8vw, 60px); font-weight:bold; text-shadow:0 0 20px #00aaff;">キャリブレーション中…</div>
+        <div style="font-size:clamp(16px, 4vw, 30px); margin-top:20px;">8の字に回してください</div>
+    </div>
+
     <script src="https://unpkg.com/three@0.142.0/build/three.min.js"></script>
     <script src="https://unpkg.com/three@0.142.0/examples/js/controls/OrbitControls.js"></script>
     <script type="module" src="js/main.js"></script>

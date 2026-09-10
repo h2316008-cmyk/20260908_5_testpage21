@@ -120,6 +120,10 @@ export class MicrobitInput {
         this.initAudio(); 
         this.isCalibrating = true;
         
+        // 追加: オーバーレイの表示
+        const overlay = document.getElementById('calibration-overlay');
+        if (overlay) overlay.style.display = 'flex';
+        
         this.calibData.minX = 2000; this.calibData.maxX = -2000;
         this.calibData.minY = 2000; this.calibData.maxY = -2000;
         this.calibData.minZ = 2000; this.calibData.maxZ = -2000;
@@ -155,6 +159,10 @@ export class MicrobitInput {
         if (!this.isCalibrating) return; 
 
         this.isCalibrating = false;
+
+        // 追加: オーバーレイの非表示
+        const overlay = document.getElementById('calibration-overlay');
+        if (overlay) overlay.style.display = 'none';
 
         if (this.calibTimer) clearTimeout(this.calibTimer);
         if (this.maxCalibTimer) clearTimeout(this.maxCalibTimer);
