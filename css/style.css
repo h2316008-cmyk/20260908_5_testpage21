@@ -91,6 +91,9 @@ button:hover {
     text-align: right;
     z-index: 3000;
     pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
 }
 
 /* ハンバーガーボタンのスタイル */
@@ -104,8 +107,7 @@ button:hover {
     justify-content: space-between;
     width: clamp(28px, 4vw, 40px);
     height: clamp(20px, 3vh, 30px);
-    margin-left: auto;
-    margin-bottom: clamp(5px, 1vh, 10px);
+    margin: 0;
 }
 
 .hamburger-btn .bar {
@@ -124,6 +126,7 @@ button:hover {
     display: none;
     flex-direction: column;
     gap: clamp(5px, 1vh, 8px);
+    margin-top: clamp(8px, 1.5vh, 12px);
     margin-bottom: clamp(5px, 1vh, 10px);
 }
 
