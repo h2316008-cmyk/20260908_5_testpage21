@@ -123,6 +123,10 @@ export class MicrobitInput {
         // 追加: オーバーレイの表示
         const overlay = document.getElementById('calibration-overlay');
         if (overlay) overlay.style.display = 'flex';
+
+        // 追加: キャリブレーションOKアイコンの非表示
+        const calibIcon = document.getElementById('calib-status-icon');
+        if (calibIcon) calibIcon.style.display = 'none';
         
         this.calibData.minX = 2000; this.calibData.maxX = -2000;
         this.calibData.minY = 2000; this.calibData.maxY = -2000;
@@ -163,6 +167,10 @@ export class MicrobitInput {
         // 追加: オーバーレイの非表示
         const overlay = document.getElementById('calibration-overlay');
         if (overlay) overlay.style.display = 'none';
+
+        // 追加: キャリブレーションOKアイコンの表示
+        const calibIcon = document.getElementById('calib-status-icon');
+        if (calibIcon) calibIcon.style.display = 'inline-block';
 
         if (this.calibTimer) clearTimeout(this.calibTimer);
         if (this.maxCalibTimer) clearTimeout(this.maxCalibTimer);
