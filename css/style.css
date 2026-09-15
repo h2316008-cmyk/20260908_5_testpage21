@@ -734,3 +734,48 @@ button:hover {
     background-color: #555;
     color: #fff;
 }
+
+/* 手動記録モーダルの文字・ボタン拡大設定 */
+#manual-record-modal {
+    font-size: 1.2rem;
+    /* 全体の文字サイズを拡大 */
+}
+
+#manual-record-modal h3 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+}
+
+#manual-record-modal label {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+/* 入力フォームとボタンのサイズ調整 */
+#manual-record-modal input[type="date"],
+#manual-record-modal input[type="time"] {
+    font-size: 1.2rem;
+    padding: 8px 10px;
+    margin-top: 4px;
+}
+
+/* スライダーの高さを広げて操作しやすく変更 */
+#manual-record-modal input[type="range"] {
+    height: 28px;
+    margin-top: 6px;
+}
+
+/* 決定・キャンセルボタンの拡大 */
+#manual-record-modal button {
+    font-size: 1.2rem;
+    padding: 10px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+#manual-record-modal {
+    align-items: flex-start;
+    /* 中央揃えから上寄せに変更 */
+    padding-top: 8vh;
+    /* 画面上部からの距離（8%） */
+}

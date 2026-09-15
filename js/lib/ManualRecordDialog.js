@@ -4,29 +4,58 @@ export class ManualRecordDialog {
         this.modal = document.getElementById('manual-record-modal');
         this.dateInput = document.getElementById('manual-date');
         this.timeInput = document.getElementById('manual-time');
+        
         this.azimuthSlider = document.getElementById('manual-azimuth');
-        this.azimuthVal = document.getElementById('manual-azimuth-val');
+        this.azimuthNum = document.getElementById('manual-azimuth-num');
+        
         this.elevationSlider = document.getElementById('manual-elevation');
-        this.elevationVal = document.getElementById('manual-elevation-val');
+        this.elevationNum = document.getElementById('manual-elevation-num');
+        
         this.okBtn = document.getElementById('manual-ok');
         this.cancelBtn = document.getElementById('manual-cancel');
 
-        this.azimuthSlider.addEventListener('input', (e) => {
-            this.azimuthVal.innerText = e.target.value;
+        // スライダーと数値入力の相互連動設定
+        this.setupSync(this.azimuthSlider, this.azimuthNum, 0, 359);
+        this.setupSync(this.elevationSlider, this.elevationNum, 0, 90);
+    }
+
+    // スライダーと数値入力ボックスを双方向で同期するメソッド
+    setupSync(slider, numInput, min, max) {
+        slider.addEventListener('input', () => {
+            numInput.value = slider.value;
         });
-        
-        this.elevationSlider.addEventListener('input', (e) => {
-            this.elevationVal.innerText = e.target.value;
+
+        numInput.addEventListener('input', () => {
+            let val = parseFloat(numInput.value);
+            if (!isNaN(val)) {
+                if (val < min) val = min;
+                if (val > max) val = max;
+                slider.value = val;
+            }
+        });
+
+        // フォーカスが外れた時の範囲補正処理
+        numInput.addEventListener('blur', () => {
+            if (numInput.value === '' || isNaN(parseFloat(numInput.value))) {
+                numInput.value = slider.value;
+            } else {
+                let val = Math.min(max, Math.max(min, parseFloat(numInput.value)));
+                numInput.value = val;
+                slider.value = val;
+            }
         });
     }
 
     show(defaultAzimuth = 0, defaultElevation = 0, defaultDate = new Date()) {
         return new Promise((resolve) => {
             // 初期値の設定
-            this.azimuthSlider.value = Math.round(defaultAzimuth);
-            this.azimuthVal.innerText = Math.round(defaultAzimuth);
-            this.elevationSlider.value = Math.round(defaultElevation);
-            this.elevationVal.innerText = Math.round(defaultElevation);
+            const azVal = Math.round(defaultAzimuth);
+            this.azimuthSlider.value = azVal;
+            this.azimuthNum.value = azVal;
+
+            const elVal = Math.round(defaultElevation);
+            this.elevationSlider.value = elVal;
+            this.elevationNum.value = elVal;
 
             // 日時のフォーマット設定
             const yyyy = defaultDate.getFullYear();
@@ -54,8 +83,8 @@ export class ManualRecordDialog {
 
                 resolve({
                     date: customDate,
-                    azimuth: parseFloat(this.azimuthSlider.value),
-                    elevation: parseFloat(this.elevationSlider.value)
+                    azimuth: parseFloat(this.azimuthNum.value),
+                    elevation: parseFloat(this.elevationNum.value)
                 });
             };
 
