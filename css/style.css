@@ -1,4 +1,36 @@
 /* css/style.css への追記・変更部分を反映した全文 */
+
+/* iPad / iOS Safari 向けの入力ボックス余白・サイズ調整 */
+#manual-record-modal input[type="date"],
+#manual-record-modal input[type="time"],
+#manual-record-modal input[type="number"],
+#manual-record-modal input[type="text"] {
+    -webkit-appearance: none;
+    /* iOS固有のスタイルをリセット */
+    box-sizing: border-box;
+    margin-top: 6px;
+    margin-bottom: 16px;
+    /* 下部マージンを拡張 */
+    padding: 10px 12px;
+    /* タップしやすいように内側余白を拡大 */
+    font-size: 1.1rem;
+    line-height: 1.4;
+}
+
+/* スライダーと数値入力欄のコンテナ間隔調整 */
+#manual-record-modal div[style*="display: flex"] {
+    gap: 16px !important;
+    /* 要素同士の横間隔をしっかり確保 */
+    margin-bottom: 16px;
+}
+
+#manual-record-modal input[type="number"] {
+    margin-bottom: 0 !important;
+    /* flex内の数値ボックスの下余白調整 */
+    flex-shrink: 0;
+    /* iPadで横幅が潰れるのを防止 */
+}
+
 body {
     margin: 0;
     overflow: hidden;
