@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 const CACHE_NAME = 'HoshiPita-cache-v5.08'; // ★ バージョンを更新してキャッシュをリフレッシュ
-=======
-const CACHE_NAME = 'HoshiPita-cache-v5.07'; // ★ バージョンを更新してキャッシュをリフレッシュ
->>>>>>> 896baab6a94d11ade2db3a0399950587aa6ffe4b
 
 // キャッシュするファイルのリスト
 const urlsToCache = [
