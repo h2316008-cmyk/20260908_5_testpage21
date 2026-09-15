@@ -779,3 +779,17 @@ button:hover {
     padding-top: 8vh;
     /* 画面上部からの距離（8%） */
 }
+
+#app-version {
+    position: fixed;
+    right: 10px;
+    bottom: 4px;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+    z-index: 9999;
+    pointer-events: none;
+    /* クリックやスライダー操作を邪魔しない */
+    user-select: none;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    /* 背景と被っても見やすく補正 */
+}

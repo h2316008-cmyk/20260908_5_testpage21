@@ -1,4 +1,4 @@
-const CACHE_NAME = 'HoshiPita-cache-v5.02'; // ★ バージョンを更新してキャッシュをリフレッシュ
+const CACHE_NAME = 'HoshiPita-cache-v5.04'; // ★ バージョンを更新してキャッシュをリフレッシュ
 
 // キャッシュするファイルのリスト
 const urlsToCache = [
@@ -14,6 +14,7 @@ const urlsToCache = [
     './js/lib/SkyController.js',
     './js/lib/MouseInput.js',
     './js/lib/MicrobitInput.js',
+    './js/lib/ManualRecordDialog.js',
     './js/lib/SharingManager.js',
     './js/lib/TimeSliderUI.js',
     './background_day.jpg',   // ★ 昼用背景画像に変更
