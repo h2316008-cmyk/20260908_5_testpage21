@@ -49,11 +49,13 @@
 
 import { MouseInput } from './MouseInput.js';
 import { MicrobitInput } from './MicrobitInput.js';
+import { ManualRecordDialog } from './ManualRecordDialog.js';
 
 // 共有機構無効化
 // import { SharingManager } from './SharingManager.js';
 import { TimeSliderUI } from './TimeSliderUI.js';
 import { DBStorage } from './db.js';
+
 
 const LATITUDE = 37.7608;
 const LONGITUDE = 140.4748;
@@ -118,6 +120,8 @@ export class SkyController {
             this.model.filterTimestamp = ts;
             this.updateViewRecords();
         });
+
+        this.manualRecordDialog = new ManualRecordDialog();
 
         this.timeSliderUI.show(this.model.records);
 
@@ -195,13 +199,43 @@ export class SkyController {
     }
 
     async executeRecord() {
-        const dir = new THREE.Vector3();
-        this.view.camera.getWorldDirection(dir);
-        const phi = Math.acos(Math.max(-1, Math.min(1, dir.y)));
-        const theta = Math.atan2(dir.z, dir.x);
-        const ele = 90 - (phi * 180 / Math.PI);
-        let azi = (theta * 180 / Math.PI) + 90;
-        if (azi < 0) azi += 360;
+        let ele, azi, phi, theta;
+        let customDate = null;
+
+        if (this.model.isSensorMode) {
+            // センサーモードの場合はカメラの向き（センサー追従）から取得
+            const dir = new THREE.Vector3();
+            this.view.camera.getWorldDirection(dir);
+            phi = Math.acos(Math.max(-1, Math.min(1, dir.y)));
+            theta = Math.atan2(dir.z, dir.x);
+            ele = 90 - (phi * 180 / Math.PI);
+            azi = (theta * 180 / Math.PI) + 90;
+            if (azi < 0) azi += 360;
+        } else {
+            // マウスモードの場合は手動入力ダイアログを表示
+            // 初期値として現在のカメラの向きを渡す
+            const dir = new THREE.Vector3();
+            this.view.camera.getWorldDirection(dir);
+            let currentPhi = Math.acos(Math.max(-1, Math.min(1, dir.y)));
+            let currentTheta = Math.atan2(dir.z, dir.x);
+            let currentEle = 90 - (currentPhi * 180 / Math.PI);
+            let currentAzi = (currentTheta * 180 / Math.PI) + 90;
+            if (currentAzi < 0) currentAzi += 360;
+
+            const manualData = await this.manualRecordDialog.show(currentAzi, currentEle);
+            if (!manualData) return; // キャンセルされた場合
+
+            ele = manualData.elevation;
+            azi = manualData.azimuth;
+            customDate = manualData.date;
+
+            // 高度と方位から phi, theta を逆算
+            phi = (90 - ele) * Math.PI / 180;
+            let tempTheta = azi - 90;
+            if (tempTheta > 180) tempTheta -= 360;
+            if (tempTheta < -180) tempTheta += 360;
+            theta = tempTheta * Math.PI / 180;
+        }
 
         const recordType = await this.promptRecordType();
         if (!recordType) return; 
@@ -218,13 +252,12 @@ export class SkyController {
 
         const observerName = this.model.observerName || "";
 
-        // 記録を追加し、描画対象として保持
-        const newRecord = this.model.addRecord(ele, azi, phi, theta, objectName, null, observerName);
+        // addRecord に customDate を渡す
+        const newRecord = this.model.addRecord(ele, azi, phi, theta, objectName, null, observerName, null, customDate);
         this.currentRecordToDraw = newRecord;
 
         const allRecords = this.model.records;
         this.timeSliderUI.show(allRecords);
-
         this.updateViewRecords();
 
         if (this.view?.showStatusMessage) {

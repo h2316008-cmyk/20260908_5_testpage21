@@ -54,7 +54,8 @@
         <button id="connectBtn">micro:bitにつなぐ</button>
         <button id="modeBtn" style="display:none;">モード: センサー</button>
         <!-- 追加: キャリブレーションOKアイコン -->
-        <span id="calib-status-icon" style="display:none; background-color:#4CAF50; color:white; padding:4px 8px; border-radius:12px; font-size:12px; font-weight:bold; margin-left:5px; vertical-align:middle;">キャリブレーションOK</span>
+        <span id="calib-status-icon"
+            style="display:none; background-color:#4CAF50; color:white; padding:4px 8px; border-radius:12px; font-size:12px; font-weight:bold; margin-left:5px; vertical-align:middle;">キャリブレーションOK</span>
         <button id="calibBtn" style="display:none;">キャリブレーションをはじめる</button>
     </div>
 
@@ -127,9 +128,43 @@
     </div>
 
     <!-- 追加: キャリブレーション中の表示 -->
-    <div id="calibration-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background-color:rgba(0,0,10,0.8); z-index:9999; flex-direction:column; justify-content:center; align-items:center; color:white; pointer-events:none;">
+    <div id="calibration-overlay"
+        style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background-color:rgba(0,0,10,0.8); z-index:9999; flex-direction:column; justify-content:center; align-items:center; color:white; pointer-events:none;">
         <div style="font-size:clamp(24px, 8vw, 60px); font-weight:bold; text-shadow:0 0 20px #00aaff;">キャリブレーション中…</div>
         <div style="font-size:clamp(16px, 4vw, 30px); margin-top:20px;">8の字に回してください</div>
+    </div>
+
+
+    <!-- 手動記録モーダル -->
+    <div id="manual-record-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-content" style="text-align: left;">
+            <h3 style="margin-top:0; text-align:center;">天体の位置と日時を手動設定</h3>
+
+            <div style="margin-bottom: 10px;">
+                <label style="display:block; margin-bottom:5px;">日付:</label>
+                <input type="date" id="manual-date" style="width:100%; padding:5px; box-sizing:border-box;">
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <label style="display:block; margin-bottom:5px;">時刻:</label>
+                <input type="time" id="manual-time" style="width:100%; padding:5px; box-sizing:border-box;">
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <label style="display:block; margin-bottom:5px;">方位角 (<span id="manual-azimuth-val">0</span>°):</label>
+                <input type="range" id="manual-azimuth" min="0" max="359" value="0" style="width:100%;">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display:block; margin-bottom:5px;">高度 (<span id="manual-elevation-val">0</span>°):</label>
+                <input type="range" id="manual-elevation" min="0" max="90" value="0" style="width:100%;">
+            </div>
+
+            <div style="display: flex; justify-content: center; gap: 10px;">
+                <button id="manual-ok" style="background:#0066cc;">決定</button>
+                <button id="manual-cancel">キャンセル</button>
+            </div>
+        </div>
     </div>
 
     <script src="https://unpkg.com/three@0.142.0/build/three.min.js"></script>

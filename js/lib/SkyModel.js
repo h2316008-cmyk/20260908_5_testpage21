@@ -63,16 +63,16 @@ export class SkyModel {
         }
     }
     
-    addRecord(elevation, azimuth, phi, theta, name = "", moonImageData = null, observerName = "", moonColor = null) {
-        const now = new Date();
-        const hours = now.getHours();
+    addRecord(elevation, azimuth, phi, theta, name = "", moonImageData = null, observerName = "", moonColor = null, customDate = null) {
+        const targetDate = customDate ? new Date(customDate) : new Date();
+        const hours = targetDate.getHours();
         const ampm = hours < 12 ? '午前' : '午後';
         const h12 = hours % 12;
         const newRecord = {
             name: name,
             observerName: observerName, 
-            dateStr: `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()}`,
-            timeStr: `${ampm}${h12}:${now.getMinutes().toString().padStart(2, '0')}`,
+            dateStr: `${targetDate.getFullYear()}/${targetDate.getMonth() + 1}/${targetDate.getDate()}`,
+            timeStr: `${ampm}${h12}:${targetDate.getMinutes().toString().padStart(2, '0')}`,
             elevation: elevation,
             azimuth: azimuth,
             phi: phi,
