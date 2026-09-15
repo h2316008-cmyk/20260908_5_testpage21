@@ -1,36 +1,6 @@
-/* css/style.css への追記・変更部分を反映した全文 */
-
-/* iPad / iOS Safari 向けの入力ボックス余白・サイズ調整 */
-#manual-record-modal input[type="date"],
-#manual-record-modal input[type="time"],
-#manual-record-modal input[type="number"],
-#manual-record-modal input[type="text"] {
-    -webkit-appearance: none;
-    /* iOS固有のスタイルをリセット */
-    box-sizing: border-box;
-    margin-top: 6px;
-    margin-bottom: 16px;
-    /* 下部マージンを拡張 */
-    padding: 10px 12px;
-    /* タップしやすいように内側余白を拡大 */
-    font-size: 1.1rem;
-    line-height: 1.4;
-}
-
-/* スライダーと数値入力欄のコンテナ間隔調整 */
-#manual-record-modal div[style*="display: flex"] {
-    gap: 16px !important;
-    /* 要素同士の横間隔をしっかり確保 */
-    margin-bottom: 16px;
-}
-
-#manual-record-modal input[type="number"] {
-    margin-bottom: 0 !important;
-    /* flex内の数値ボックスの下余白調整 */
-    flex-shrink: 0;
-    /* iPadで横幅が潰れるのを防止 */
-}
-
+/* =========================================
+   1. ベース設定・全体レイアウト
+   ========================================= */
 body {
     margin: 0;
     overflow: hidden;
@@ -49,6 +19,9 @@ body {
     touch-action: none;
 }
 
+/* =========================================
+   2. メインUI（ボタン・メニュー）
+   ========================================= */
 /* 左上のUIコンテナ */
 #ui-container {
     position: absolute;
@@ -68,7 +41,6 @@ body {
 
 /* ボタンの共通スタイル */
 button {
-    /* paddingとfont-sizeを画面幅に連動させる */
     padding: clamp(8px, 1.5vw, 10px) clamp(10px, 2vw, 15px);
     font-size: clamp(14px, 2vw, 16px);
     cursor: pointer;
@@ -83,7 +55,6 @@ button:hover {
     background-color: rgba(255, 255, 255, 0.4);
 }
 
-/* 記録するボタンのスタイル (固有の色指定を削除し、共通スタイルを適用) */
 #recordBtn {
     font-weight: bold;
 }
@@ -162,19 +133,47 @@ button:hover {
     margin-bottom: clamp(5px, 1vh, 10px);
 }
 
-/* メニューが開いた状態 */
 .action-buttons.is-open {
     display: flex;
 }
 
-/* 縦並び用に幅と余白を調整 */
 .action-buttons button {
     width: 100%;
     margin-right: 0;
     box-sizing: border-box;
 }
 
-/* 中央の十字ラベル */
+/* メニュー内のチェックボックス用スタイル */
+.menu-checkboxes {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(8px, 1.5vh, 12px);
+    margin-top: clamp(10px, 2vh, 15px);
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    padding-top: clamp(10px, 2vh, 15px);
+    text-align: left;
+}
+
+.menu-checkboxes label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: clamp(12px, 2.5vw, 15px);
+    cursor: pointer;
+    color: #ffffff;
+    user-select: none;
+}
+
+.menu-checkboxes input[type="checkbox"] {
+    cursor: pointer;
+    width: clamp(16px, 3vw, 20px);
+    height: clamp(16px, 3vw, 20px);
+    margin: 0;
+}
+
+/* =========================================
+   3. 画面内情報（十字ラベル・ステータス・ツールチップ）
+   ========================================= */
 #crosshair-labels {
     position: fixed;
     top: 50%;
@@ -214,7 +213,6 @@ button:hover {
     border-radius: 4px;
 }
 
-/* キャリブレーション等の一時メッセージ（中央付近） */
 #status-message {
     position: absolute;
     top: clamp(50px, 10vh, 75px);
@@ -231,7 +229,6 @@ button:hover {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 }
 
-/* ふきだし（ツールチップ）のスタイル */
 #tooltip {
     position: absolute;
     background: rgba(255, 255, 255, 0.95);
@@ -259,7 +256,6 @@ button:hover {
     border-color: rgba(255, 255, 255, 0.95) transparent transparent transparent;
 }
 
-/* 吹き出し内の削除ボタン */
 #delete-record-btn {
     background-color: #e63946;
     color: white;
@@ -279,7 +275,170 @@ button:hover {
     background-color: #d62828;
 }
 
-/* モーダルのスタイル */
+/* =========================================
+   4. 共有機能・タイムスライダー UI
+   ========================================= */
+#shared-time-slider-container {
+    position: fixed;
+    bottom: clamp(15px, 3vh, 30px);
+    left: clamp(15px, 3vw, 30px);
+    right: clamp(15px, 3vw, 30px);
+    padding: clamp(10px, 1.5vh, 15px) clamp(15px, 2vw, 20px);
+    background: rgba(0, 20, 50, 0.8);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    z-index: 3000;
+    text-align: center;
+    pointer-events: auto;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+}
+
+#shared-time-header {
+    position: fixed;
+    bottom: clamp(95px, 13vh, 120px);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    background: rgba(0, 15, 35, 0.75);
+    backdrop-filter: blur(4px);
+    padding: clamp(6px, 1vh, 8px) clamp(16px, 3vw, 24px);
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    pointer-events: auto;
+}
+
+#shared-time-display {
+    font-size: clamp(16px, 3.5vw, 22px);
+    color: #40c4ff;
+    font-weight: bold;
+    font-family: monospace;
+    text-shadow: 0 0 6px rgba(0, 0, 0, 0.9), 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+#reset-time-btn {
+    padding: clamp(3px, 0.8vw, 5px) clamp(8px, 1.2vw, 12px);
+    font-size: clamp(12px, 1.8vw, 14px);
+    background-color: rgba(0, 170, 255, 0.3);
+    border: 1px solid #00aaff;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    margin-right: 0;
+    transition: background-color 0.2s;
+}
+
+#reset-time-btn:hover {
+    background-color: rgba(0, 170, 255, 0.6);
+}
+
+#shared-time-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    cursor: pointer;
+    box-sizing: border-box;
+    background: transparent;
+}
+
+#shared-time-slider::-webkit-slider-runnable-track,
+#shared-time-slider::-moz-range-track {
+    width: 100%;
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+}
+
+#shared-time-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    background: #00aaff;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-top: -6px;
+    border: none;
+}
+
+#shared-time-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    background: #00aaff;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
+
+#shared-time-ticks {
+    position: relative;
+    width: 100%;
+    height: 20px;
+    margin-top: 2px;
+    pointer-events: none;
+}
+
+.time-tick-label {
+    position: absolute;
+    transform: translateX(-50%);
+    font-size: clamp(10px, 1.8vw, 12px);
+    color: #88ccff;
+    white-space: nowrap;
+    font-family: monospace;
+    top: 4px;
+}
+
+.time-tick-line {
+    position: absolute;
+    top: 0;
+    width: 1px;
+    height: 6px;
+    background-color: rgba(255, 255, 255, 0.4);
+    transform: translateX(-50%);
+}
+
+#shared-time-marks {
+    position: relative;
+    width: 100%;
+    height: 10px;
+    pointer-events: none;
+    margin-bottom: 2px;
+}
+
+.time-record-mark {
+    position: absolute;
+    bottom: 0;
+    width: 4px;
+    height: 8px;
+    background-color: #ffcc00;
+    border-radius: 2px;
+    transform: translateX(-50%);
+    box-shadow: 0 0 4px rgba(255, 204, 0, 0.8);
+    z-index: 10;
+}
+
+.active-share {
+    background-color: #e63946 !important;
+    border-color: #d62828 !important;
+}
+
+#btn-record-back {
+    background: #555555;
+    border: 1px solid #777777;
+}
+
+#btn-record-back:hover {
+    background: #777777;
+}
+
+/* =========================================
+   5. 各種モーダルウィンドウ（共通・記録系）
+   ========================================= */
+/* 基本モーダル（オーバーレイ・コンテンツ） */
 #modal-overlay,
 .modal-overlay {
     position: fixed;
@@ -305,6 +464,7 @@ button:hover {
     box-shadow: 0 0 20px rgba(0, 170, 255, 0.5);
 }
 
+/* 記録リスト */
 #record-list {
     list-style: none;
     padding: 0;
@@ -333,7 +493,7 @@ button:hover {
     margin-top: clamp(10px, 2vh, 15px);
 }
 
-/* 入力を止めないオリジナルポップアップのスタイル */
+/* 入力を止めないオリジナルポップアップ */
 #prompt-modal {
     position: fixed;
     top: 0;
@@ -410,7 +570,6 @@ button:hover {
     justify-content: center;
     gap: clamp(10px, 2vw, 15px);
     flex-wrap: wrap;
-    /* 画面が狭いときに折り返すように */
 }
 
 .mode-buttons button {
@@ -429,246 +588,9 @@ button:hover {
     background: #0066cc;
 }
 
-/* Bluetooth切断防止のための独自の枠 */
-#bt-connection-frame {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    border: 5px solid rgba(0, 170, 255, 0.6);
-    box-shadow: inset 0 0 20px rgba(0, 170, 255, 0.4);
-    box-sizing: border-box;
-    pointer-events: none;
-    z-index: 9000;
-    display: none;
-}
-
 /* =========================================
-   共有機能関連のUIスタイル
+   6. 月のスケッチ（描画）モーダル
    ========================================= */
-
-#shared-time-slider-container {
-    position: fixed;
-    /* 画面下部に配置し、左右に広げる */
-    bottom: clamp(15px, 3vh, 30px);
-    left: clamp(15px, 3vw, 30px);
-    right: clamp(15px, 3vw, 30px);
-    padding: clamp(10px, 1.5vh, 15px) clamp(15px, 2vw, 20px);
-    background: rgba(0, 20, 50, 0.8);
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    z-index: 3000;
-    text-align: center;
-    pointer-events: auto;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
-}
-
-#shared-time-header {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: clamp(5px, 1vh, 10px);
-}
-
-#shared-time-display {
-    /* フォントサイズを拡大（最小16px〜最大22px） */
-    font-size: clamp(16px, 3.5vw, 22px);
-    color: #40c4ff;
-    /* 視認性の高い明るいシアンカラー */
-    font-weight: bold;
-    font-family: monospace;
-    /* 黒い影をしっかりつけて文字をくっきり見せる */
-    text-shadow: 0 0 6px rgba(0, 0, 0, 0.9), 1px 1px 2px rgba(0, 0, 0, 0.8);
-}
-
-#reset-time-btn {
-    padding: clamp(3px, 0.8vw, 5px) clamp(8px, 1.2vw, 12px);
-    font-size: clamp(12px, 1.8vw, 14px);
-    background-color: rgba(0, 170, 255, 0.3);
-    border: 1px solid #00aaff;
-    border-radius: 4px;
-    color: white;
-    cursor: pointer;
-    margin-right: 0;
-    transition: background-color 0.2s;
-}
-
-#reset-time-btn:hover {
-    background-color: rgba(0, 170, 255, 0.6);
-}
-
-/* スライダーのデフォルトスタイルをリセットしつつ幅を画面いっぱいに */
-#shared-time-slider {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    cursor: pointer;
-    box-sizing: border-box;
-    background: transparent;
-}
-
-/* 箱の外に出した「時刻表示・ボタン」のレイアウト設定 */
-#shared-time-header {
-    position: fixed;
-    bottom: clamp(95px, 13vh, 120px);
-    left: 50%;
-    transform: translateX(-50%);
-
-    /* 内容を中央寄せ */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 12px;
-
-    /* 明るい背景でも視認性を保つ背景バッジ */
-    background: rgba(0, 15, 35, 0.75);
-    backdrop-filter: blur(4px);
-    /* 背景をほんのりぼかす */
-    padding: clamp(6px, 1vh, 8px) clamp(16px, 3vw, 24px);
-    border-radius: 30px;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-
-    z-index: 9999;
-    pointer-events: auto;
-}
-
-/* バー（軌道）のスタイル：着色せずグレーにする */
-#shared-time-slider::-webkit-slider-runnable-track {
-    width: 100%;
-    height: 6px;
-    background: #e0e0e0;
-    border-radius: 3px;
-}
-
-#shared-time-slider::-moz-range-track {
-    width: 100%;
-    height: 6px;
-    background: #e0e0e0;
-    border-radius: 3px;
-}
-
-/* 丸（つまみ）のスタイル：ここだけ指定の色にする */
-#shared-time-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 18px;
-    height: 18px;
-    background: #00aaff;
-    border-radius: 50%;
-    cursor: pointer;
-    margin-top: -6px;
-    border: none;
-}
-
-#shared-time-slider::-moz-range-thumb {
-    width: 18px;
-    height: 18px;
-    background: #00aaff;
-    border-radius: 50%;
-    cursor: pointer;
-    border: none;
-}
-
-/* スライダー下の目盛り・日付ラベル */
-#shared-time-ticks {
-    position: relative;
-    width: 100%;
-    height: 20px;
-    margin-top: 2px;
-    pointer-events: none;
-}
-
-.time-tick-label {
-    position: absolute;
-    transform: translateX(-50%);
-    font-size: clamp(10px, 1.8vw, 12px);
-    color: #88ccff;
-    white-space: nowrap;
-    font-family: monospace;
-    top: 4px;
-}
-
-.time-tick-line {
-    position: absolute;
-    top: 0;
-    width: 1px;
-    height: 6px;
-    background-color: rgba(255, 255, 255, 0.4);
-    transform: translateX(-50%);
-}
-
-.active-share {
-    background-color: #e63946 !important;
-    border-color: #d62828 !important;
-}
-
-/* 「戻る」ボタンの専用スタイル */
-#btn-record-back {
-    background: #555555;
-    border: 1px solid #777777;
-}
-
-#btn-record-back:hover {
-    background: #777777;
-}
-
-/* =========================================
-   メニュー内のチェックボックス用スタイル
-   ========================================= */
-.menu-checkboxes {
-    display: flex;
-    flex-direction: column;
-    gap: clamp(8px, 1.5vh, 12px);
-    margin-top: clamp(10px, 2vh, 15px);
-    border-top: 1px solid rgba(255, 255, 255, 0.3);
-    padding-top: clamp(10px, 2vh, 15px);
-    text-align: left;
-}
-
-.menu-checkboxes label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: clamp(12px, 2.5vw, 15px);
-    cursor: pointer;
-    color: #ffffff;
-    user-select: none;
-    /* テキストの誤選択を防ぐ */
-}
-
-.menu-checkboxes input[type="checkbox"] {
-    cursor: pointer;
-    width: clamp(16px, 3vw, 20px);
-    height: clamp(16px, 3vw, 20px);
-    margin: 0;
-}
-
-/* =========================================
-   タイムスライダーの記録マーク用スタイル
-   ========================================= */
-#shared-time-marks {
-    position: relative;
-    width: 100%;
-    height: 10px;
-    pointer-events: none;
-    margin-bottom: 2px;
-}
-
-.time-record-mark {
-    position: absolute;
-    bottom: 0;
-    width: 4px;
-    height: 8px;
-    background-color: #ffcc00;
-    border-radius: 2px;
-    transform: translateX(-50%);
-    box-shadow: 0 0 4px rgba(255, 204, 0, 0.8);
-    z-index: 10;
-}
-
 #moon-draw-modal {
     position: fixed;
     top: 0;
@@ -704,11 +626,8 @@ button:hover {
 
 #moon-canvas-container {
     position: relative;
-    /* デバイスサイズ（画面の短い方）に合わせて相対的に変化させる。
-        clamp()で最小200px、基本70vmin、最大500pxの範囲に収める */
     width: clamp(200px, 70vmin, 500px);
     height: clamp(200px, 70vmin, 500px);
-    /* 正方形を維持 */
     background-color: #000;
     border: 2px solid #555;
     margin: clamp(10px, 2vh, 15px) 0;
@@ -717,12 +636,10 @@ button:hover {
     align-items: center;
     touch-action: none;
     box-sizing: border-box;
-    /* ボーダーを含めてサイズ計算する */
 }
 
 #moon-canvas-guide {
     position: absolute;
-    /* 親コンテナに対して相対的なサイズ（80%）にする */
     width: 80%;
     height: 80%;
     border: 2px dashed rgba(255, 255, 255, 0.4);
@@ -735,7 +652,6 @@ button:hover {
     position: absolute;
     top: 0;
     left: 0;
-    /* 親コンテナいっぱいに広げる */
     width: 100%;
     height: 100%;
     cursor: crosshair;
@@ -767,10 +683,13 @@ button:hover {
     color: #fff;
 }
 
-/* 手動記録モーダルの文字・ボタン拡大設定 */
+/* =========================================
+   7. 手動記録モーダル（iPad対応・サイズ調整統合）
+   ========================================= */
 #manual-record-modal {
     font-size: 1.2rem;
-    /* 全体の文字サイズを拡大 */
+    align-items: flex-start;
+    padding-top: 8vh;
 }
 
 #manual-record-modal h3 {
@@ -783,21 +702,36 @@ button:hover {
     font-weight: bold;
 }
 
-/* 入力フォームとボタンのサイズ調整 */
-#manual-record-modal input[type="date"],
-#manual-record-modal input[type="time"] {
-    font-size: 1.2rem;
-    padding: 8px 10px;
-    margin-top: 4px;
+/* スライダーと数値入力欄のコンテナ間隔調整 */
+#manual-record-modal div[style*="display: flex"] {
+    gap: 16px !important;
+    margin-bottom: 16px;
 }
 
-/* スライダーの高さを広げて操作しやすく変更 */
+/* iPad / iOS Safari 向けの入力ボックス余白・サイズ調整 */
+#manual-record-modal input[type="date"],
+#manual-record-modal input[type="time"],
+#manual-record-modal input[type="number"],
+#manual-record-modal input[type="text"] {
+    -webkit-appearance: none;
+    box-sizing: border-box;
+    margin-top: 6px;
+    margin-bottom: 16px;
+    padding: 10px 12px;
+    font-size: 1.2rem;
+    line-height: 1.4;
+}
+
+#manual-record-modal input[type="number"] {
+    margin-bottom: 0 !important;
+    flex-shrink: 0;
+}
+
 #manual-record-modal input[type="range"] {
     height: 28px;
     margin-top: 6px;
 }
 
-/* 決定・キャンセルボタンの拡大 */
 #manual-record-modal button {
     font-size: 1.2rem;
     padding: 10px 24px;
@@ -805,13 +739,9 @@ button:hover {
     cursor: pointer;
 }
 
-#manual-record-modal {
-    align-items: flex-start;
-    /* 中央揃えから上寄せに変更 */
-    padding-top: 8vh;
-    /* 画面上部からの距離（8%） */
-}
-
+/* =========================================
+   8. ユーティリティ（バージョン表示・切断防止枠など）
+   ========================================= */
 #app-version {
     position: fixed;
     right: 10px;
@@ -820,8 +750,20 @@ button:hover {
     color: rgba(255, 255, 255, 0.6);
     z-index: 9999;
     pointer-events: none;
-    /* クリックやスライダー操作を邪魔しない */
     user-select: none;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-    /* 背景と被っても見やすく補正 */
+}
+
+#bt-connection-frame {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    border: 5px solid rgba(0, 170, 255, 0.6);
+    box-shadow: inset 0 0 20px rgba(0, 170, 255, 0.4);
+    box-sizing: border-box;
+    pointer-events: none;
+    z-index: 9000;
+    display: none;
 }
