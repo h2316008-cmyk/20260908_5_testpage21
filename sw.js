@@ -1,4 +1,4 @@
-const CACHE_NAME = 'HoshiPita-cache-v5.08'; // ★ バージョンを更新してキャッシュをリフレッシュ
+const CACHE_NAME = 'HoshiPita-cache-v1.09'; // ★ バージョンを更新してキャッシュをリフレッシュ
 
 // キャッシュするファイルのリスト
 const urlsToCache = [
@@ -23,6 +23,7 @@ const urlsToCache = [
     'https://unpkg.com/three@0.142.0/build/three.min.js',
     'https://unpkg.com/three@0.142.0/examples/js/controls/OrbitControls.js',
     'https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js'
+    
 ];
 
 // インストール時にキャッシュを保存
